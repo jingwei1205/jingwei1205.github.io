@@ -1,5 +1,5 @@
 ---
-title: 万恶之源！Github Pages & Jekyll，您的第一个博客何必是博客
+title: 万恶之源！Github Pages & Jekyll-theme-chirpy，您的第一个博客何必是博客
 description: Github Pages免费服务 与 静态网站生成器Jekyll快速搭建自己的博客系统。 
 author: jingwei
 date: 2025-11-25 15:32:00 +0800
