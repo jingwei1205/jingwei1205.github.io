@@ -49,8 +49,8 @@ jekyll 4.3.1
 
  ![github pages 设置说明](/assets/img/blog/20251125/start01.png)
 
- ![github pages 流水线部署说明](/assets/img/blog/20251125/start02.png){: width="972" height="589" .w-50 .left}  
- 点击action后可以看到build 与 deploy的过程，若为❌则表示失败，可以点击查看错误原因，若为✅则表示成功，在settings中会生成你的页面地址，点击后即可到达。  
+
+ ![github pages 流水线部署说明](/assets/img/blog/20251125/start02.png){: width="972" height="589" .w-50 .left}点击Actions后可以看到build 与 deploy的过程，由于github pages中不会自动你npm生成相关的样式文件，会导致直接部署报<kbd>import js error</kbd>之类的错误，若为❌则表示失败，可以点击查看错误原因，若为✅则表示成功，在settings中会生成你的页面地址，点击后即可到达您部署的博客页。  
 **避坑指南**：  
 很多主题会缺失相关样式文件，例如本主题的starter版本您直接本地运行或者github pages运行没有任何问题，但是您若是想复刻这个主题的[**demo**](https://chirpy.cotes.page/posts/getting-started/)，您会发现报错，这是因为缺少了很多样式素材与文件，使用以下命令获取本主题的gem路径，将里面的<kbd>_data _include assets</kbd>等文件复制到项目文件中（需提前将你的项目git clone到本地）。
 ```shell
