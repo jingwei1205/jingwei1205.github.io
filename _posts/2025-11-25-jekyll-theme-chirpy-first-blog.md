@@ -1,6 +1,6 @@
 ---
-title: 万恶之源！Github Pages & Jekyll-theme-chirpy，您的第一个博客何必是博客
-description: Github Pages免费服务 与 静态网站生成器Jekyll快速搭建自己的博客系统。 
+title: 使用Github Pages与Chirpy（Jekyll）主题搭建个人主页，您的第一个博客何必是博客
+description: 得益于无敌的Github Pages免费服务与静态网站生成器Jekyll（含有一大堆精美博客主题），可以快速搭建自己的博客系统，在这里我选择了Chirpy主题，非常简约耐看，拥有黑白双模，当然在部署过程中也踩了非常多的大坑小坑，最终终于解决，我发现网上很少有关于Chirpy主题部署踩坑的专栏，所以写下了此篇文章，希望能对大家有所帮助！（我不会告诉你因为我觉得这个主题特别好看才折腾了这个玩意儿，养成了写博客习惯的万恶之源~~）。 
 author: jingwei
 date: 2025-11-25 15:32:00 +0800
 categories: [Blogging, Misc]
@@ -119,7 +119,7 @@ jekyll s
 5. 根据配置文件修改<kbd>_config.yml</kbd>
 ![modify config](/assets/img/blog/20251125/start07.png)
 6. 此时本地运行就可以跑通，但是本主题会有个坑，需要在gitignore文件中注释掉，否则推送到github pages会报js资源缺失的问题。
-7. 这样评论区就安装好啦，大家不信的话在我评论区留言噢~~（绝不是骗评论）~~！
+7. 这样评论区就安装好啦，大家不信的话在我评论区留言噢~~（绝不是骗评论）~~！当然，大家如果发现问题或者有不理解的部分，欢迎留言噢，博主有空就会回复的！（~~谁知道有没有空，万一博客都不更新了呢！万一博主只会回收到呢！毕竟是全脂低钙纯牛马~~）
 ```gitignore
 # assets/js/dist
 ```
