@@ -44,7 +44,11 @@ jobs:
         with:
           ruby-version: 3.3
           bundler-cache: true
-      
+       # 新增：安装 Node.js 并执行 npm 构建
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
       - name: npm build
         run: npm install && npm run build
 
