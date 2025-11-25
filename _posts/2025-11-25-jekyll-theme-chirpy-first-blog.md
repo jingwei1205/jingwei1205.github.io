@@ -47,9 +47,9 @@ jekyll 4.3.1
 ## 4. github pages设置  
  由于本页面使用jekyll，所以需要进入仓库设置页面中-pages，选择部署方式为Action，点击configure按钮会要求你提交一个jekyll的yml文件，commit文本最好使用<kbd>type(scope): subject</kbd>规范提交，然后项目就会自动部署，点击Action查看部署成功与否，根据第一阶段的提到的视频可以理解该步骤的操作。
 
- ![Build source](/assets/img/blog/20251125/start01.png)
+ ![github pages 设置说明](/assets/img/blog/20251125/start01.png)
 
- ![Build source](/assets/img/blog/20251125/start02.png){: width="972" height="589" .w-50 .left}  
+ ![github pages 流水线部署说明](/assets/img/blog/20251125/start02.png){: width="972" height="589" .w-50 .left}  
  点击action后可以看到build 与 deploy的过程，若为❌则表示失败，可以点击查看错误原因，若为✅则表示成功，在settings中会生成你的页面地址，点击后即可到达。
 
 **避坑指南**：  
@@ -89,4 +89,38 @@ github_username: your_github_username
 jekyll s
 ```
 
+## *7. 引入评论系统
+评论插件有多种，本文选用[**giscuss**](https://github.com/apps/giscus)
+1. 安装giscuss
+![giscuss install](/assets/img/blog/20251125/start03.png)
+2. 选择需要安装的库，默认所有库，建议选择需要的库
+![giscuss install](/assets/img/blog/20251125/start04.png)
+3. 登录github进入主页库中，点击Settings，在Feature下勾选Discussion
+![giscuss install](/assets/img/blog/20251125/start05.png)
+4. 登录giscuss官网，配置选项，最后生成一个配置文件如下所示
+![giscuss install](/assets/img/blog/20251125/start06.png)
+```yml
+<script src="https://giscus.app/client.js"
+        data-repo="xxx/xxx.github.io"
+        data-repo-id="xxx"
+        data-category="Announcements"
+        data-category-id="xxx"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+```
+5. 根据配置文件修改<kbd>_config.yml</kbd>
+![modify config](/assets/img/blog/20251125/start07.png)
+6. 此时本地运行就可以跑通，但是本主题会有个坑，需要在gitignore文件中注释掉，否则推送到github pages会报js资源缺失的问题。
+7. 这样评论区就安装好啦，大家不信的话在我评论区留言噢~~（绝不是骗评论）~~！
+```gitignore
+# assets/js/dist
+```
 [starter]: https://github.com/cotes2020/chirpy-starter
