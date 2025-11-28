@@ -14,18 +14,18 @@ image:
 ---
 ### 1. 工欲利其事，必先利其器
 打CTF如果不用任何工具单纯使用python脚本编写，效率会很慢，每种题型都有其适合的解题辅助工具，甚至还有大佬根据题型写的一把梭工具，但是入门时不推荐使用一把梭，因为很容易忽略知识点，太过依赖工具，万一出了套娃题就死哈一只了（特指死掉的蟹），在做CTFshow网站中的misc 入门题（全为图片题）主要用到以下工具，以后做到图片题时可以回来看看噢！本文题目来源于[**CTFShow**](https://ctf.show/)，作为misc入门非常友好。
-| 序号  |             本节所需工具             |                                            用途                                            |          平台           |
-| :---: | :----------------------------------: | :----------------------------------------------------------------------------------------: | :---------------------: |
-|   1   |               tweakpng               |                                  png图片数据块查看，编辑                                   |         windows         |
-|   2   |                WinHex                |                                查看、编辑文件16进制串的工具                                |         windows         |
-|   3   |              010Editor               |                            查看、编辑文件16进制串的工具（推荐）                            |         windows         |
-|   4   |              StegSolve               |                                        查看图像通道                                        | jar包，需java -jar 运行 |
-|   5   |             apngdis_gui              |                           将 APNG 文件分解为一系列独立的 PNG 帧                            |         windows         |
-|   6   |               binwalk                |                        分析和提取二进制文件（包括固件映像）中的数据                        |          linux          |
-|   7   |               foremost               |                        依据文件内的文件头和文件尾对一个文件进行分离                        |          linux          |
-|   8   |               exiftool               |                      查看文件属性信息，类似于windows鼠标右键查看属性                       |          linux          |
-|   9   | honeyview(free) or bandiview(bought) |                              bandi公司出品的多格式图片查看器                               |         windows         |
-|  10   |                Python                | 编写脚本解题的关键语言，简单库多，解题的不二语言，推荐使用pycharm中的jupyterbook，代码补全 |       python env        |
+|序号|本节所需工具|用途|平台|
+|:---:|:---:|:---:|:---:|
+|1|tweakpng|png图片数据块查看，编辑|windows|
+|2|WinHex|查看、编辑文件16进制串的工具|windows|
+|3|010Editor|查看、编辑文件16进制串的工具（推荐）|windows|
+|4|StegSolve|查看图像通道|jar包，需java -jar 运行 |
+|5|apngdis_gui|将 APNG 文件分解为一系列独立的 PNG 帧|windows|
+|6|binwalk|分析和提取二进制文件（包括固件映像）中的数据|linux|
+|7|foremost|依据文件内的文件头和文件尾对一个文件进行分离|linux|
+|8|exiftool|查看文件属性信息，类似于windows鼠标右键查看属性|linux|
+|9|honeyview(free) or bandiview(bought)|bandi公司出品的多格式图片查看器|windows|
+|10|Python| 编写脚本解题的关键语言，简单库多，解题的不二语言，推荐使用pycharm中的jupyterbook，代码补全 |python env|
 ### 2. WriteUp
 #### 2.1 Misc1.png
 **锐评：** 不是每道题都有锐评，但是如果ctf竞赛也出这种题是不是就拼手速抢分了，恭喜您拿到了新手福利，下载后直接两眼一瞪，这不是我苦苦寻觅的flag吗，怎么直接就出来了，一定是假的，一定是假的！  
@@ -38,7 +38,7 @@ image:
 ![flag](/assets/img/blog/20251128/misc2.png)  
 **flag：** <kbd>ctfshow{6f66202f21ad22a2a19520cdd3f69e7b}</kbd>
 #### 2.3 Misc3.bpg
-**锐评：** 什么！还有我打不开的图片格式？你别激动，智能看图，我说的不是你！你个流氓软件！  
+**锐评：** 什么！还有我打不开的图片格式？你别激动，智能看图，我说的不是你！你个流氓软件！PS：是我吗？等你打开再看到flag旗子分数都变成负分了！
 **logic:** 直接使用honeyview bandiview打开图片查看      
 **flag：** <kbd>ctfshow{aade771916df7cde3009c0e631f9910d}</kbd>
 #### 2.4 Misc4.txt
@@ -47,17 +47,17 @@ image:
 **flag：** <kbd>ctfshow{4314e2b15ad9a960e7d9d8fcff902da}</kbd>
 #### 2.5 Misc5.png
 **锐评：** 什么！there is no flag！你说no就no？继续炼丹！  
-**logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c*t*f，f*l*a*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件末尾（当然各位师傅眼力好直接就能看到）  
+**logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c\*t\*f，f\*l\*a\*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件末尾（当然各位师傅眼力好直接就能看到）  
 ![](/assets/img/blog/20251128/misc5.png)  
 **flag：** <kbd>ctfshow{2a476b4011805f1a8e4b906c8f84083e}</kbd>
 #### 2.6 Misc6.png
 **锐评：** 什么！看不起我？一样的题出两遍？  
-**logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c*t*f，f*l*a*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件中间（当然各位师傅眼力好也得看花了这次，真到中间了）
+**logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c\*t\*f，f\*l\*a\*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件中间（当然各位师傅眼力好也得看花了这次，真到中间了）
 ![](/assets/img/blog/20251128/misc6.png)  
 **flag：** <kbd>ctfshow{d5e937aefb091d38e70d927b80e1e2ea}</kbd>
 #### 2.7 Misc7.jpg
 **锐评：** 这知识点出三遍？质疑我们智商吗，其实这个让我们加深了肌肉记忆，拿进来先扔010，看文件格式魔数是否正确，再搜索文件信息是否含有关键信息。  
-**logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c*t*f，f*l*a*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件中间（当然各位师傅眼力好也得花了，听我的别用你的眼睛了）
+**logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c\*t\*f，f\*l\*a\*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件中间（听我的别用你的眼睛了）
 ![](/assets/img/blog/20251128/misc7.png)  
 **flag：** <kbd>ctfshow{c5e77c9c289275e3f307362e1ed86bb7}</kbd>
 #### 2.8 Misc8.png
