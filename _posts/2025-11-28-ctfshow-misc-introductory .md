@@ -16,18 +16,18 @@ image:
 打CTF如果不用任何工具单纯使用python脚本编写，效率会很慢，每种题型都有其适合的解题辅助工具，甚至还有大佬根据题型写的一把梭工具，但是入门时不推荐使用一把梭，因为很容易忽略知识点，太过依赖工具，万一出了套娃题就死哈一只了（特指死掉的蟹），在做CTFshow网站中的misc 入门题（全为图片题）主要用到以下工具，以后做到图片题时可以回来看看噢！本文题目来源于[**CTFShow**](https://ctf.show/)，作为misc入门非常友好。  
 
 
-|序号|本节所需工具|用途|平台|
-|:---:|:---:|:---:|:---:|
-|1|tweakpng|png图片数据块查看，编辑|windows|
-|2|WinHex|查看、编辑文件16进制串的工具|windows|
-|3|010Editor|查看、编辑文件16进制串的工具（推荐）|windows|
-|4|StegSolve|查看图像通道|jar包，需java -jar 运行 |
-|5|apngdis_gui|将 APNG 文件分解为一系列独立的 PNG 帧|windows|
-|6|binwalk|分析和提取二进制文件（包括固件映像）中的数据|linux|
-|7|foremost|依据文件内的文件头和文件尾对一个文件进行分离|linux|
-|8|exiftool|查看文件属性信息，类似于windows鼠标右键查看属性|linux|
-|9|honeyview(free) or bandiview(bought)|bandi公司出品的多格式图片查看器|windows|
-|10|Python| 编写脚本解题的关键语言，简单库多，解题的不二语言，推荐使用pycharm中的jupyterbook，代码补全 |python env|  
+| 序号  |             本节所需工具             |                                            用途                                            |          平台           |
+| :---: | :----------------------------------: | :----------------------------------------------------------------------------------------: | :---------------------: |
+|   1   |               tweakpng               |                                  png图片数据块查看，编辑                                   |         windows         |
+|   2   |                WinHex                |                                查看、编辑文件16进制串的工具                                |         windows         |
+|   3   |              010Editor               |                            查看、编辑文件16进制串的工具（推荐）                            |         windows         |
+|   4   |              StegSolve               |                                        查看图像通道                                        | jar包，需java -jar 运行 |
+|   5   |             apngdis_gui              |                           将 APNG 文件分解为一系列独立的 PNG 帧                            |         windows         |
+|   6   |               binwalk                |                        分析和提取二进制文件（包括固件映像）中的数据                        |          linux          |
+|   7   |               foremost               |                        依据文件内的文件头和文件尾对一个文件进行分离                        |          linux          |
+|   8   |               exiftool               |                      查看文件属性信息，类似于windows鼠标右键查看属性                       |          linux          |
+|   9   | honeyview(free) or bandiview(bought) |                              bandi公司出品的多格式图片查看器                               |         windows         |
+|  10   |                Python                | 编写脚本解题的关键语言，简单库多，解题的不二语言，推荐使用pycharm中的jupyterbook，代码补全 |       python env        |
 
 
 ### 2. WriteUp
@@ -42,7 +42,7 @@ image:
 ![flag](/assets/img/blog/20251128/misc2.png)  
 **flag：** <kbd>ctfshow{6f66202f21ad22a2a19520cdd3f69e7b}</kbd>
 #### 2.3 Misc3.bpg
-**锐评：** 什么！还有我打不开的图片格式？你别激动，智能看图，我说的不是你！你个流氓软件！PS：是我吗？等你打开再看到flag旗子分数都变成负分了！
+**锐评：** 什么！还有我打不开的图片格式？你别激动，智能看图，我说的不是你！你个流氓软件！PS：是我吗？等你打开再看到flag旗子分数都变成负分了！  
 **logic:** 直接使用honeyview bandiview打开图片查看      
 **flag：** <kbd>ctfshow{aade771916df7cde3009c0e631f9910d}</kbd>
 #### 2.4 Misc4.txt
@@ -69,10 +69,30 @@ image:
 **logic:** 扔进010中对比魔数正确，搜索ascii字符中没有关键字，乃么好嘞，死哈一只了，不我还能抢救，彩色没有未来，黑白窗口给我力量，打开kali输入<kbd>binwalk misc8.png</kbd>，发现里面藏了两张png图片，此时使用<kbd>foremost misc8.png</kbd>，在桌面上out文件夹中会获得两张图片，一张就是flag啦！你会问，你不是linux吗为啥在桌面上，那当然我用的wsl啦，强推wsl比虚拟机好用一万倍！windows用户专属福利噢！
 ![](/assets/img/blog/20251128/misc8-1.png)  
 ![](/assets/img/blog/20251128/misc8.png)   
-有人就会锐评你的锐评了，你这锐评和这题目有啥关联吗，那肯定有啊，我不喜欢说废话的，每句话言简意赅。**这是因为当你打开010查看的时候会发现两个89 50 4E 47说明有两个png文件，但是第二张png不会被显示，只会显示第一张，那么是不是把第一张删除了就能看到第二张了呢？让我们运行下面这行指令，就能直接得到结果，这是了解知识的解题方法，发现第二张png从3892地址开始，那么跳过3892个字节截取后面的内容就是第二张png的内容啦！
+有人就会锐评你的锐评了，你这锐评和这题目有啥关联吗，那肯定有啊，我不喜欢说废话的，每句话言简意赅。**这是因为当你打开010查看的时候会发现两个89 50 4E 47说明有两个png文件，但是第二张png不会被显示，只会显示第一张，那么是不是把第一张删除了就能看到第二张了呢？**让我们运行下面这行指令，就能直接得到结果，这是了解知识的解题方法，发现第二张png从3892地址开始，那么跳过3892个字节截取后面的内容就是第二张png的内容啦！
 ```shell
 dd if=misc8.png of=flag.png bs=1 skip=3892
 ```
 ![](/assets/img/blog/20251128/misc8-2.png) 
 **flag：** <kbd>ctfshow{1df0a9a3f709a2605803664b55783687}</kbd>
+
+#### 2.9 Misc9.png
+**锐评：** 不想评价，可能出题人觉得我们太菜了，需要题海战术。   
+**logic:** 使用010editor打开文件，<kbd>ctrl+f</kbd>搜索ctfshow即可获得flag。  
+![](/assets/img/blog/20251128/misc9.png) 
+**flag：** <kbd>ctfshow{5c5e819508a3ab1fd823f11e83e93c75}</kbd>
+#### 2.10 Misc10.png
+**锐评：** keybots解体！好啊，你又背着我藏私房旗。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），这里有个地方会给你误导，就是他有两个idat块，使用tweakpng合体后发现无事发生，便感觉不妙，这肯定是藏文件了，遂奔向binwalk的怀抱，一bin一个不吱声，果然发现里面有zip包，直接<kbd>binwalk -e misc10.png --run-as=root</kbd>梭出来，使用grep或者strings命令查找字符串。  
+![](/assets/img/blog/20251128/misc10-1.png) 
+![](/assets/img/blog/20251128/misc10-2.png) 
+![](/assets/img/blog/20251128/misc10-3.png) 
+**flag：** <kbd>ctfshow{353252424ac69cb64f643768851ac790}</kbd>
+#### 2.11 Misc11.png
+**锐评：** 乃悟前狼假寐，盖以诱敌。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），binwalk发现有隐藏文件，但是解出后并无flag信息，此时继续从010找答案，发现两个IDAT数据块，将第一个数据块使用tweakpng删除后保存即可得到flag。  
+**theory：**IDAT 块只有当上一个块充满（正常length最大65524）时，才会继续一个新的块。程序读取图像的时候也会在第一个未满的块停止（查了下W3C标准，其实是PNG图片在压缩的时候会在最后一个块的标记位标明这是最后一个数据块）。所以如果某一块没有满但后面却还有 IDAT 块则说明后面的块是“假”的，这里发现第一个数据块根本没有填满就有另一个。
+![](/assets/img/blog/20251128/misc11-1.png)   
+![](/assets/img/blog/20251128/misc11.png)   
+**flag：** <kbd>ctfshow{44620176948fa759d3eeafeac99f1ce9}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
