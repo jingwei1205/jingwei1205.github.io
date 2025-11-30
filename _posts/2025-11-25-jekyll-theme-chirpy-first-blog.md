@@ -4,7 +4,7 @@ description: 得益于无敌的Github Pages免费服务与静态网站生成器J
 author: jingwei
 date: 2025-11-25 15:32:00 +0800
 categories: [Blogging, Misc]
-tags: [Misc]
+tags: [other]
 pin: true
 math: true
 mermaid: true
