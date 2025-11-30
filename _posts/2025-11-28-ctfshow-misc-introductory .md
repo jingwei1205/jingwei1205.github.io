@@ -95,4 +95,138 @@ dd if=misc8.png of=flag.png bs=1 skip=3892
 ![](/assets/img/blog/20251128/misc11-1.png)   
 ![](/assets/img/blog/20251128/misc11.png)   
 **flag：** <kbd>ctfshow{44620176948fa759d3eeafeac99f1ce9}</kbd>
+#### 2.12 Misc12.png
+**锐评：** 乃悟前狼们假寐，盖以诱敌。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），binwalk发现无隐藏文件，此时继续从010找答案，发现数个IDAT数据块，每块都不满就有下一块，使用tweakpng整合后在使用binwalk发现两个zlib文件，但是使用binwalk -e解包出来后发现无flag，考虑将第一个zlib部分删除，共 3149-41 = 3108，将未合并的图片使用tweakpng打开后发现前8IDAT刚好长度为3108，删除后重新保存图片获得flag。
+![](/assets/img/blog/20251128/misc12-1.png)   
+![](/assets/img/blog/20251128/misc12-2.png)   
+**flag：** <kbd>ctfshow{10ea26425dd4708f7da7a13c8e256a73}</kbd>
+#### 2.13 Misc13.png
+**锐评：** 小时候玩过跳房子吗，有些地方不能踩噢。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），可以搜到c\*t\*f的关键词（我上面的题目疯狂暗示噢，夹花搜也有可能），发现每个关键部分隔了一个字符，将字符记录下来写python脚本解出flag。将所有可以字符串复制到脚本中解出，发现有三个flag是一致的，有一个flag不一样，将两个flag分别提交后即可。
+![](/assets/img/blog/20251128/misc13-1.png)   
+```python
+interval_str1 = "ct¹f…s†hªoKw°{!aeS6¥eT34fxa%4Ý8ïf«52•8b‚1º7E4|2Td~7:2äeñ6úfõ4129T8ñ328é0l}"
+interval_str2 = "ct¹f…s†hªoKw°{!1eS3¥eT24exd%4Ý8ïf«51•8b‚7ºeE4|2T6~7:däeñ1úcõ412aT8ñ329éal}"
+interval_str3 = "ct¹f…s†hªoKw°{!aeS6¥eT34exa%4Ý8ïf«51•8b‚7ºeE4|2Td~7:däeñ6úfõ412fT8ñ329éal}"
+interval_str4 = "ct¹f…s†hªoKw°{!aeS6¥eT446xc%4Ý8ïf«73•9b‚7ºeEb|2Td~1:däeñ6úeõ412fT8ñ329éal}"
+interval_str = [interval_str1, interval_str2, interval_str3, interval_str4]
+for key_str in interval_str:
+    result = ""
+    for i in range(0, len(key_str)):
+        if i%2==0:
+            result += key_str[i]
+    print("第", interval_str.index(key_str) + 1, "个可疑字符串隐藏的flag:", result)
+```
+**flag：** <kbd>ctfshow{ae6e46c48f739b7eb2d1de6e412f839a}</kbd>
+#### 2.14 Misc14.jpg
+**锐评：** 还是那头狼假寐诱敌，但是这次的猎物是jpg。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），binwalk发现隐藏文件，使用binwalk -e解包无果，考虑使用以下命令将第二幅jepg前部分删除。
+![](/assets/img/blog/20251128/misc14-1.png)   
+```shell
+dd if=misc14.jpg of=result.jpg bs=1 skip=$((0x837))
+```
+![](/assets/img/blog/20251128/misc14-2.jpg)   
+**flag：** <kbd>ctfshow{ce520f767fc465b0787cdb936363e694}</kbd>
+#### 2.15 Misc15.bmp
+**锐评：** 别人能藏的地方我也能藏，谁还不是二进制动物啦。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），搜索到ctf关键词得到flag。
+![](/assets/img/blog/20251128/misc15-1.png)   
+**flag：** <kbd>ctfshow{fbe7bb657397e6e0a6adea3e40265425}</kbd>
+#### 2.16 Misc16.png
+**锐评：** 别人能藏的地方我也能藏，谁还不是二进制动物啦。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），无果上binwalk，发现有文件隐藏，直接使<kbd>用binwalk -e misc16.png --run-as=root</kbd>提取得到文件，使用grep命令搜索ctf关键词得到了flag。
+![](/assets/img/blog/20251128/misc16-1.png)   
+![](/assets/img/blog/20251128/misc16-2.png)   
+**flag：** <kbd>ctfshow{a7e32f131c011290a62476ae77190b52}</kbd>
+#### 2.17 Misc17.png
+**锐评：** 宝儿，你不是我亲生的，你的DNA是89 50 4E 47，你是png的孩子。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），无果上binwalk，发现有文件隐藏，直接使<kbd>用binwalk -e misc17.png --run-as=root</kbd>提取得到文件无果，考虑合并IDAT后再使用binwalk扫描提取文件发现藏了一个zip，使用同样命令分离后，无法使用grep找到flag，将每个文件丢到010发现有个文件的魔数为png，修改后缀名即可。
+![](/assets/img/blog/20251128/misc17-1.png)   
+![](/assets/img/blog/20251128/misc17-2.png)   
+**flag：** <kbd>ctfshow{0fe61fc42e8bbe55b9257d251749ae45}</kbd>
+#### 2.18 Misc18.jpg
+**锐评：** 你出生时有些事情就决定好了，例如像你们出生就是富二代。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），搜到ctf关键词但是发现断断续续的，而且有很多adobe的属性内容，考虑查看属性，使用exiftool命令查看。但是直接使用右键在windows上查看属性，不用排序，直接按照显示顺序输入即可。
+![](/assets/img/blog/20251128/misc18.png)    
+**flag：** <kbd>ctfshow{325d60c208f728ac17e5f02d4cf5a839}</kbd>
+#### 2.19 Misc19.tif
+**锐评：** 但是有些人出生就是富二代，他爸妈却没告诉他。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），搜到ctf关键词但是发现断的，两段拼起来即可。
+![](/assets/img/blog/20251128/misc19.png)    
+**flag：** <kbd>ctfshow{c97964b1aecf06e1d79c21ddad593e42}</kbd>
+#### 2.20 Misc20.jpg
+**锐评：** 少小离家老大回，乡音无改鬓毛衰。有些口音你生下来就会了改不了，让我们感叹母语迸发的力量。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现一段离谱的中文，接下来你只要读出来这段中文，flag就从你嘴巴里出来了，若你不会中文，这道题就跳过吧。
+![](/assets/img/blog/20251128/misc20.png)    
+**flag：** <kbd>ctfshow{c97964b1aecf06e1d79c21ddad593e42}</kbd>
+#### 2.21 Misc21.jpg
+**锐评：** 。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现一段序列串，将这个序列串复制到字符串自动映射的[**网站**](https://www.rapidtables.com/convert/number/ascii-hex-bin-dec-converter.html)，发现asicii码解出来是有意义的，要把所有的X和Y变成16进制组合在一起，写脚本解决。
+![](/assets/img/blog/20251128/misc21-2.png)    
+![](/assets/img/blog/20251128/misc21-1.png)   
+```python
+data = [3902939465,1082452817,2371618619,2980145261]
+
+result = "ctfshow{" + "".join(format(d, "x") for d in data) + "}"
+print(result)
+``` 
+**flag：** <kbd>ctfshow{e8a221494084eb518d5c073bb1a1686d}</kbd>
+#### 2.22 Misc22.jpg
+**锐评：** 有的人表面黑白分明，刚正不阿，很高大的样子，其实他把黄黄的内心藏在了小小的图里，不仔细看真看不出来你是这样的人。  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现有缩略图<kbd>Thumbnail Image                 : (Binary data 8201 bytes, use -b option to extract)</kbd>，提示使用exiftool -b提取，主打一个听人劝使用以下命令提取得到缩略图，黄色字就是flag。
+![](/assets/img/blog/20251128/misc22.png)    
+```shell
+exiftool -b -ThumbnailImage misc22.jpg > thumb.jpg
+``` 
+**flag：** <kbd>ctfshow{dbf7d3f84b0125e833dfd3c80820a129}</kbd>
+#### 2.23 Misc23.psd
+**锐评：** 看清楚是psd，不是ptsd，因为经过时间长了少了time就不pstd了，我没t，我没t，恐龙抗狼抗狼抗！  
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现有getflag的提示，需要将时间戳从十进制转为十六进制就可以得到flag啦，发现修改历史中有很多时间戳，转为long类型时间戳后转十六进制即可获得。
+![](/assets/img/blog/20251128/misc23.png)    
+```python
+from datetime import datetime, timezone, timedelta
+
+def parse_timestamp(time_str):
+    """
+    解析 ISO 8601 时间字符串（带 +HH:MM 时区），返回 UTC 时间戳
+    """
+    # 使用 fromisoformat 解析
+    dt = datetime.fromisoformat(time_str)
+    # 转为 UTC 时间
+    dt_utc = dt.astimezone(timezone.utc)
+    # 返回整数 Unix 时间戳
+    return int(dt_utc.timestamp())
+
+def deal_time():
+    result = "ctfshow{"
+    # 时间列表
+    times = [
+        "1997:09:22 02:17:02+08:00",
+        "2055:07:15 12:14:48+08:00",
+        "2038:05:05 16:50:45+08:00",
+        "1984:08:03 18:41:46+08:00"
+    ]
+
+    print(f"{'Original Time':35} {'Timestamp (DEC)':15} {'Timestamp (HEX)'}")
+    print("-"*70)
+
+    for t in times:
+        # 把 ":" 改成 "-"，适配 fromisoformat
+        t_iso = t.replace(":", "-", 2)  # 只替换前两个冒号（年份后冒号不要动）
+        ts = parse_timestamp(t_iso)
+        ts_hex = hex(ts).upper()[2:]  # 去掉 0x 并大写
+        result+=ts_hex;
+        print(f"{t:35} {ts:<15} {ts_hex}")
+    result += "}"
+    print(result.lower())
+
+deal_time()
+``` 
+**flag：** <kbd>ctfshow{3425649ea0e31938808c0de51b70ce6a}</kbd>
+#### 2.41 Misc41.jpg
+**锐评：** 听说只有愚人节的愚人才能cosplay这道旗，H4ppy Apr1l F001's D4y！   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），如果题目想戏耍你就肯定给你很多误解，你会发现图片都打不开，FOOL = F001？？？，喜欢cosplay是吧，那我就highlight所有愚人，看你们排的什么队！
+![](/assets/img/blog/20251128/misc41.png)     
+**flag：** <kbd>ctfshow{fcbd427caf4a52f1147ab44346cd1cdd}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
