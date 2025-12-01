@@ -229,4 +229,18 @@ deal_time()
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），如果题目想戏耍你就肯定给你很多误解，你会发现图片都打不开，FOOL = F001？？？，喜欢cosplay是吧，那我就highlight所有愚人，看你们排的什么队！
 ![](/assets/img/blog/20251128/misc41.png)     
 **flag：** <kbd>ctfshow{fcbd427caf4a52f1147ab44346cd1cdd}</kbd>
+#### 2.24 Misc24.bmp
+**锐评：** 听说站得高看得远，那我长得高是不是也能看到一样的风景。   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现文件结构全是FF，使用binwalk也未发现隐藏文件，使用exiftool发现该图片字节数、比特位和大小，通过以下公式
+$$
+Byte(bmp) = width \times height \times bit \div 8
+$$
+计算后发现图片高度不对，遂查看数据块长度为675002B，24 bit位图，宽为900，计算高度为250，在010中修改高度得到图片
+![](/assets/img/blog/20251128/misc24.bmp)     
+**flag：** <kbd>ctfshow{dd7d8bc9e5e873eb7da3fa51d92ca4b7}</kbd>
+#### 2.25 Misc25.png
+**锐评：** 听说蹲下来才能拍出更美的照片。   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现一切照旧，使用binwalk，exiftool未发现异常，考虑到是png，校验crc值，crc值010打开后12-28的字节，通过[**网站校验**](https://www.ip33.com/crc.html)发现问题，怀疑图片大小有问题，爆破高度，得到250，修改高度即可。
+![](/assets/img/blog/20251128/misc25.png)     
+**flag：** <kbd>ctfshow{494f611cc5842dd597f460874ce38f57}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
