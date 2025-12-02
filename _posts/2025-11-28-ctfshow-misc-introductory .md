@@ -241,6 +241,136 @@ $$
 #### 2.25 Misc25.png
 **锐评：** 听说蹲下来才能拍出更美的照片。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现一切照旧，使用binwalk，exiftool未发现异常，考虑到是png，校验crc值，crc值010打开后12-28的字节，通过[**网站校验**](https://www.ip33.com/crc.html)发现问题，怀疑图片大小有问题，爆破高度，得到250，修改高度即可。
+```python
+import os
+import struct
+import zlib
+
+IMG_DIR = "./img"
+MIN_H = 1
+MAX_H = 20000     # 需要更大范围自行调高
+
+PNG_SIG = b"\x89PNG\r\n\x1a\n"
+
+
+def parse_chunks(data):
+    """解析 PNG chunk，返回 (length, type, data, crc, offset)"""
+    if not data.startswith(PNG_SIG):
+        raise ValueError("不是 PNG 文件")
+
+    off = len(PNG_SIG)
+    chunks = []
+
+    while off + 8 <= len(data):
+        length = struct.unpack(">I", data[off:off+4])[0]
+        ctype = data[off+4:off+8]
+        d_start = off + 8
+        d_end = d_start + length
+        if d_end + 4 > len(data):
+            break
+
+        cdata = data[d_start:d_end]
+        crc = struct.unpack(">I", data[d_end:d_end+4])[0]
+
+        chunks.append((length, ctype, cdata, crc, off))
+        off = d_end + 4
+        if ctype == b"IEND":
+            break
+    return chunks
+
+
+def fix_ihdr_height(data, ihdr_data, crc_stored, width, off):
+    """暴力遍历高度寻找使 CRC 正确的高度"""
+    tail = ihdr_data[8:]   # IHDR 后 5 字节：bitdepth/color/filter/interlace
+    correct = []
+
+    for h in range(MIN_H, MAX_H + 1):
+        new_data = struct.pack(">I", width) + struct.pack(">I", h) + tail
+        crc_calc = zlib.crc32(b"IHDR" + new_data) & 0xffffffff
+        if crc_calc == crc_stored:
+            correct.append(h)
+
+    return correct
+
+
+def analyze_png(path):
+    with open(path, "rb") as f:
+        data = f.read()
+
+    chunks = parse_chunks(data)
+    result = []
+
+    for length, ctype, cdata, crc_stored, off in chunks:
+        crc_calc = zlib.crc32(ctype + cdata) & 0xffffffff
+        if crc_calc == crc_stored:
+            continue
+
+        if ctype == b"IHDR":
+            width = struct.unpack(">I", cdata[0:4])[0]
+            height = struct.unpack(">I", cdata[4:8])[0]
+
+            print(f"\n[!] IHDR CRC 错误 → 文件: {path}")
+            print(f"    宽度: {width}")
+            print(f"    原始高度: {height}")
+            print(f"    CRC(存储):  0x{crc_stored:08X}")
+            print(f"    CRC(计算):  0x{crc_calc:08X}")
+            print(f"    IHDR 偏移: {off}")
+
+            print("\n[*] 开始遍历高度寻找匹配 CRC ...")
+            correct = fix_ihdr_height(data, cdata, crc_stored, width, off)
+
+            if correct:
+                print(" [+] 找到正确高度 candidate(s):", correct)
+            else:
+                print(" [-] 未找到匹配 CRC 的高度 (范围 {}~{})".format(MIN_H, MAX_H))
+
+            result.append((path, width, height, correct, off))
+    return result
+
+
+def main():
+    print("扫描 img/ 目录中 PNG 文件...\n")
+
+    for fn in os.listdir(IMG_DIR):
+        path = os.path.join(IMG_DIR, fn)
+        if not os.path.isfile(path):
+            continue
+
+        with open(path, "rb") as f:
+            if not f.read(8).startswith(PNG_SIG):
+                continue
+
+        analyze_png(path)
+
+
+if __name__ == "__main__":
+    main()
+```
 ![](/assets/img/blog/20251128/misc25.png)     
 **flag：** <kbd>ctfshow{494f611cc5842dd597f460874ce38f57}</kbd>
+#### 2.26 Misc26.png
+**锐评：** 你不会造轮子，还不会用轮子吗。   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现一切照旧，使用binwalk，exiftool未发现异常，考虑到是png，校验crc值，crc值010打开后12-28的字节，通过[**网站校验**](https://www.ip33.com/crc.html)发现问题，怀疑图片大小有问题，爆破高度，得到606，修改高度即可，然后将高度变成16进制数就可以拼。（偷偷告诉你可以使用上题的脚本一把梭出高度噢）
+![](/assets/img/blog/20251128/misc26.png)     
+**flag：** <kbd>ctfshow{94aef125e087a7ccf2e28e742efd704c}</kbd>
+#### 2.27 Misc27.png
+**锐评：** 你不会造轮子，还不会用轮子吗。   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现一切照旧，使用binwalk，exiftool未发现异常，考虑到是png，校验crc值，crc值010打开后12-28的字节，通过[**网站校验**](https://www.ip33.com/crc.html)发现问题，怀疑图片大小有问题，爆破高度，得到606，修改高度即可，然后将高度变成16进制数就可以拼。（偷偷告诉你可以使用上题的脚本一把梭出高度噢）
+![](/assets/img/blog/20251128/misc27.png)     
+**flag：** <kbd>ctfshow{94aef125e087a7ccf2e28e742efd704c}</kbd> 
+#### 2.28 Misc28.gif
+**锐评：** 敌不动我不动。   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），先不急着上kali，由于是gif文件，需要先尝试分离帧，使用[**在线网站分离预览**](https://www.ufreetools.com/zh/tool/gif-frame-extractor)，发现只有一帧，考虑改变高度，切记将LocalScreenDescribtor与Data块中所有ImageDescribtor中的高度都要更改，否则无法显示部分帧的高度导致关键flag会遗漏。
+![](/assets/img/blog/20251128/misc28.gif)     
+**flag：** <kbd>ctfshow{59c8bc525426166b1c893fe12a387fd7}</kbd>
+#### 2.28 Misc28.gif
+**锐评：** 敌不动我不动。   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），先不急着上kali，由于是gif文件，需要先尝试分离帧，使用[**在线网站分离预览**](https://www.ufreetools.com/zh/tool/gif-frame-extractor)，发现只有一帧，考虑改变高度，切记将LocalScreenDescribtor与Data块中所有ImageDescribtor中的高度都要更改，否则无法显示部分帧的高度导致关键flag会遗漏。
+![](/assets/img/blog/20251128/misc28.gif)     
+**flag：** <kbd>ctfshow{59c8bc525426166b1c893fe12a387fd7}</kbd>
+#### 2.29 Misc29.gif
+**锐评：** 敌乱动我乱动。   
+**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），先不急着上kali，由于是gif文件，需要先尝试分离帧，使用[**在线网站分离预览**](https://www.ufreetools.com/zh/tool/gif-frame-extractor)，发现多帧，但是移动到下方的时候考虑下方还有东西，尝试着改变高度，切记将LocalScreenDescribtor与Data块中所有ImageDescribtor中的高度都要更改，否则无法显示部分帧的高度导致关键flag会遗漏，重新送到帧分离器中发现其中第8帧含有flag，写入即可。
+![](/assets/img/blog/20251128/misc29.png)     
+**flag：** <kbd>ctfshow{03ce5be6d60a4b3c7465ab9410801440}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
