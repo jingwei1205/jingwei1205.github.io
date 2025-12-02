@@ -373,4 +373,613 @@ if __name__ == "__main__":
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），先不急着上kali，由于是gif文件，需要先尝试分离帧，使用[**在线网站分离预览**](https://www.ufreetools.com/zh/tool/gif-frame-extractor)，发现多帧，但是移动到下方的时候考虑下方还有东西，尝试着改变高度，切记将LocalScreenDescribtor与Data块中所有ImageDescribtor中的高度都要更改，否则无法显示部分帧的高度导致关键flag会遗漏，重新送到帧分离器中发现其中第8帧含有flag，写入即可。
 ![](/assets/img/blog/20251128/misc29.png)     
 **flag：** <kbd>ctfshow{03ce5be6d60a4b3c7465ab9410801440}</kbd>
+#### 2.30 Misc30.bmp
+**锐评：** 看清题目再做题，我打赌有人直接做题。   
+**logic:** 使用010editor打开文件直接按照提示修改宽度为950，宽度英文为width不是height。
+![](/assets/img/blog/20251128/misc30.bmp)     
+**flag：** <kbd>ctfshow{6db8536da312f6aeb42da2f45b5f213c}</kbd>
+#### 2.31 Misc31.bmp
+**锐评：** 听说拉伸之后眼神也会变好。   
+**logic:** 使用010editor打开文件搜打撤无果，发现数据块该图片字节数、比特位和大小，通过以下公式
+$$
+Byte(bmp) = width \times height \times bit \div 8
+$$
+计算后发现图片高度不对，遂查看数据块长度为487202B，24 bit位图，高为150，计算宽为1082，在010中修改高度得到图片
+![](/assets/img/blog/20251128/misc31.bmp)     
+**flag：** <kbd>ctfshow{fb09dcc9005fe3feeefb73646b55efd5}</kbd>
+#### 2.32 Misc32.png
+**锐评：** C4爆破！什么C4，cs玩多了？是CRC。   
+**logic:** 使用010editor打开文件搜打撤无果，校验CRC发生问题，提示告诉高度正确，爆破宽度1044，在010中修改高度得到图片,给出一个自动校验CRC与先后爆破高度和宽度的代码,直接一把梭。
+```python
+import os
+import struct
+import zlib
+
+IMG_DIR = "./img"
+MIN_H = 1
+MAX_H = 20000
+MIN_W = 1
+MAX_W = 20000
+
+PNG_SIG = b"\x89PNG\r\n\x1a\n"
+
+
+def parse_chunks(data):
+    """解析 PNG chunk，返回 (length, type, data, crc, offset)"""
+    if not data.startswith(PNG_SIG):
+        raise ValueError("不是 PNG 文件")
+
+    off = len(PNG_SIG)
+    chunks = []
+
+    while off + 8 <= len(data):
+        length = struct.unpack(">I", data[off:off + 4])[0]
+        ctype = data[off + 4:off + 8]
+        d_start = off + 8
+        d_end = d_start + length
+        if d_end + 4 > len(data):
+            break
+
+        cdata = data[d_start:d_end]
+        crc = struct.unpack(">I", data[d_end:d_end + 4])[0]
+
+        chunks.append((length, ctype, cdata, crc, off))
+        off = d_end + 4
+        if ctype == b"IEND":
+            break
+
+    return chunks
+
+
+def fix_ihdr_height(cdata, crc_stored, width):
+    """只爆破高度"""
+    tail = cdata[8:]  # IHDR 后 5 字节: bit-depth 等
+    candidates = []
+
+    for h in range(MIN_H, MAX_H + 1):
+        new_data = struct.pack(">I", width) + struct.pack(">I", h) + tail
+        crc_calc = zlib.crc32(b"IHDR" + new_data) & 0xffffffff
+        if crc_calc == crc_stored:
+            candidates.append(h)
+
+    return candidates
+
+
+def fix_ihdr_width(cdata, crc_stored, height):
+    """只爆破宽度"""
+    tail = cdata[8:]
+    candidates = []
+
+    for w in range(MIN_W, MAX_W + 1):
+        new_data = struct.pack(">I", w) + struct.pack(">I", height) + tail
+        crc_calc = zlib.crc32(b"IHDR" + new_data) & 0xffffffff
+        if crc_calc == crc_stored:
+            candidates.append(w)
+
+    return candidates
+
+
+def fix_ihdr_bruteforce_both(cdata, crc_stored, width, height):
+    """
+    先爆破高度，如果失败，再爆破宽度
+    返回 (height_candidates, width_candidates)
+    """
+    print("\n[*] ① 开始爆破高度 ...")
+    h_candidates = fix_ihdr_height(cdata, crc_stored, width)
+    if h_candidates:
+        print(" [+] 成功找到高度 candidate(s):", h_candidates)
+        return h_candidates, []
+
+    print(" [-] 高度未找到，继续爆破宽度 ...")
+
+    w_candidates = fix_ihdr_width(cdata, crc_stored, height)
+    if w_candidates:
+        print(" [+] 成功找到宽度 candidate(s):", w_candidates)
+        return [], w_candidates
+
+    print(" [-] 宽度也未找到匹配 CRC")
+    return [], []
+
+
+def analyze_png(path):
+    with open(path, "rb") as f:
+        data = f.read()
+
+    chunks = parse_chunks(data)
+
+    for length, ctype, cdata, crc_stored, off in chunks:
+        crc_calc = zlib.crc32(ctype + cdata) & 0xffffffff
+
+        if crc_calc == crc_stored:
+            continue
+
+        if ctype == b"IHDR":
+            width = struct.unpack(">I", cdata[0:4])[0]
+            height = struct.unpack(">I", cdata[4:8])[0]
+
+            print(f"\n[!] IHDR CRC 错误 → 文件: {path}")
+            print(f"    宽度: {width}")
+            print(f"    高度: {height}")
+            print(f"    CRC(存储):  0x{crc_stored:08X}")
+            print(f"    CRC(计算):  0x{crc_calc:08X}")
+            print(f"    IHDR 偏移: {off}")
+
+            # ★ 新逻辑：先爆高度 → 再爆宽度
+            h_res, w_res = fix_ihdr_bruteforce_both(cdata, crc_stored, width, height)
+
+            if h_res:
+                print(f"\n最终结果：高度可能值 → {h_res}\n")
+            elif w_res:
+                print(f"\n最终结果：宽度可能值 → {w_res}\n")
+            else:
+                print("\n最终结果：高度、宽度均未找到匹配 CRC。\n")
+
+
+def main():
+    print("扫描 img/ 目录中 PNG 文件...\n")
+
+    for fn in os.listdir(IMG_DIR):
+        path = os.path.join(IMG_DIR, fn)
+        if not os.path.isfile(path):
+            continue
+
+        with open(path, "rb") as f:
+            if not f.read(8).startswith(PNG_SIG):
+                continue
+
+        analyze_png(path)
+
+
+if __name__ == "__main__":
+    main()
+```
+![](/assets/img/blog/20251128/misc32.png)     
+**flag：** <kbd>ctfshow{fb09dcc9005fe3feeefb73646b55efd5}</kbd>
+#### 2.33 Misc33.png
+**锐评：** 长宽都不知道我怎么知道你有没有规矩。   
+**logic:** 使用010editor打开文件搜打撤，发现crc校验失败，直接按照提示分别爆破长宽，得到的长宽为（978，142），将以上脚本改进可以得到png crc问题的一把梭脚本。
+```python
+import os
+import struct
+import zlib
+
+IMG_DIR = "./img"
+
+MIN_H = 1
+MAX_H = 2000
+MIN_W = 1
+MAX_W = 2000
+
+PNG_SIG = b"\x89PNG\r\n\x1a\n"
+
+
+def parse_chunks(data):
+    """解析 PNG chunk，返回 (length, type, data, crc, offset)"""
+    if not data.startswith(PNG_SIG):
+        raise ValueError("不是 PNG 文件")
+
+    off = len(PNG_SIG)
+    chunks = []
+
+    while off + 8 <= len(data):
+        length = struct.unpack(">I", data[off:off+4])[0]
+        ctype = data[off+4:off+8]
+        d_start = off + 8
+        d_end = d_start + length
+        if d_end + 4 > len(data):
+            break
+
+        cdata = data[d_start:d_end]
+        crc = struct.unpack(">I", data[d_end:d_end+4])[0]
+
+        chunks.append((length, ctype, cdata, crc, off))
+        off = d_end + 4
+        if ctype == b"IEND":
+            break
+
+    return chunks
+
+
+# ---------- 第一阶段：爆高度 ----------
+def brute_height(cdata, crc_stored, width):
+    """爆破高度"""
+    tail = cdata[8:]
+    res = []
+
+    for h in range(MIN_H, MAX_H + 1):
+        new = struct.pack(">I", width) + struct.pack(">I", h) + tail
+        if zlib.crc32(b"IHDR" + new) & 0xffffffff == crc_stored:
+            res.append(h)
+
+    return res
+
+
+# ---------- 第二阶段：爆宽度 ----------
+def brute_width(cdata, crc_stored, height):
+    """爆破宽度"""
+    tail = cdata[8:]
+    res = []
+
+    for w in range(MIN_W, MAX_W + 1):
+        new = struct.pack(">I", w) + struct.pack(">I", height) + tail
+        if zlib.crc32(b"IHDR" + new) & 0xffffffff == crc_stored:
+            res.append(w)
+
+    return res
+
+
+# ---------- 第三阶段：二维爆破（高 × 宽） ----------
+def brute_2d(cdata, crc_stored):
+    """
+    最终必杀技：宽度 + 高度双重不确定，双层爆破
+    仅在前两个阶段失败时启用
+    """
+    tail = cdata[8:]
+    res = []
+
+    print("\n[!] 启动二维宽高爆破（可能较慢，但保证“一把梭”）")
+    for w in range(MIN_W, MAX_W + 1):
+        if w % 500 == 0:
+            print(f"  → 进度：宽度 w={w}")
+
+        for h in range(MIN_H, MAX_H + 1):
+            new = struct.pack(">I", w) + struct.pack(">I", h) + tail
+            if zlib.crc32(b"IHDR" + new) & 0xffffffff == crc_stored:
+                res.append((w, h))
+
+    return res
+
+
+# ---------- 主分析函数 ----------
+def analyze_png(path):
+    with open(path, "rb") as f:
+        data = f.read()
+
+    chunks = parse_chunks(data)
+
+    for length, ctype, cdata, crc_stored, off in chunks:
+        crc_calc = zlib.crc32(ctype + cdata) & 0xffffffff
+        if crc_calc == crc_stored:
+            continue
+
+        if ctype == b"IHDR":
+            width = struct.unpack(">I", cdata[0:4])[0]
+            height = struct.unpack(">I", cdata[4:8])[0]
+
+            print(f"\n[!] IHDR CRC 错误 → 文件: {path}")
+            print(f"    当前宽: {width}")
+            print(f"    当前高: {height}")
+            print(f"    CRC(存储): 0x{crc_stored:08X}")
+            print(f"    CRC(计算): 0x{crc_calc:08X}")
+
+            # ---------- 第一阶段：爆高度 ----------
+            print("\n[*] ① 尝试爆破高度 ...")
+            h_res = brute_height(cdata, crc_stored, width)
+            if h_res:
+                print(" [+] 找到高度:", h_res)
+                return
+
+            # ---------- 第二阶段：爆宽度 ----------
+            print("[-] 高度无结果，② 尝试爆破宽度 ...")
+            w_res = brute_width(cdata, crc_stored, height)
+            if w_res:
+                print(" [+] 找到宽度:", w_res)
+                return
+
+            # ---------- 第三阶段：二维最终爆破 ----------
+            print("[-] 宽度无结果，③ 开始二维宽高联合爆破 ...")
+            xy_res = brute_2d(cdata, crc_stored)
+
+            if xy_res:
+                print(" [+] 找到匹配 (宽, 高) 列表:", xy_res)
+            else:
+                print("[-] 宽高二维爆破仍未找到匹配 CRC（极少见，可能文件损坏）")
+
+
+def main():
+    print("扫描 img/ 目录中 PNG 文件...\n")
+
+    for fn in os.listdir(IMG_DIR):
+        path = os.path.join(IMG_DIR, fn)
+        if not os.path.isfile(path):
+            continue
+
+        with open(path, "rb") as f:
+            if not f.read(8).startswith(PNG_SIG):
+                continue
+
+        analyze_png(path)
+
+
+if __name__ == "__main__":
+    main()
+```
+![](/assets/img/blog/20251128/misc33.png)     
+**flag：** <kbd>ctfshow{03070a10ec3a3282ba1e352f4e07b0a9}</kbd>
+#### 2.30 Misc30.bmp
+**锐评：** 如果你束手无策，你会干什么，你问什么屁话，当然是束手。   
+**logic:** 由于这道题长宽全部被篡改，连crc都被改了，上面基于crc的爆破方式无法使用，只能另谋出路，IDAT 解压后长度 = (每行字节数+1) * 高度
+→ 已知长度 + 猜宽 → 可推高度，filter byte 校验保证每行格式合法，CRC 校验保证 chunk 内容正确（如果 CRC 被篡改，需要先暴力爆破），最终写入新文件保证 IHDR 和 CRC 与真实数据一致，基于以上原理暴力破解，使用如下代码：
+```python
+import os
+import struct
+import zlib
+
+IMG_DIR = "./img"
+MIN_W = 1
+MAX_W = 2000   # 你之前给定的最大宽
+MIN_H = 1
+MAX_H = 20000
+
+PNG_SIG = b"\x89PNG\r\n\x1a\n"
+
+
+# ============================================================
+# ===============    基础功能：解析 PNG chunk    ===============
+# ============================================================
+
+def parse_chunks(data):
+    if not data.startswith(PNG_SIG):
+        raise ValueError("不是 PNG 文件")
+    off = len(PNG_SIG)
+    chunks = []
+    while off + 8 <= len(data):
+        length = struct.unpack(">I", data[off:off + 4])[0]
+        ctype = data[off + 4:off + 8]
+        d_start = off + 8
+        d_end = d_start + length
+        if d_end + 4 > len(data):
+            break
+        cdata = data[d_start:d_end]
+        crc = struct.unpack(">I", data[d_end:d_end + 4])[0]
+        chunks.append((length, ctype, cdata, crc, off))
+        off = d_end + 4
+        if ctype == b"IEND":
+            break
+    return chunks
+
+
+def samples_per_pixel(color_type):
+    return {
+        0: 1,  # gray
+        2: 3,  # RGB
+        3: 1,  # indexed
+        4: 2,  # gray+alpha
+        6: 4,  # RGBA
+    }.get(color_type, None)
+
+
+def concat_idat(chunks):
+    return b"".join(cdata for length, ctype, cdata, crc, off in chunks if ctype == b"IDAT")
+
+
+# ============================================================
+# ========= IDAT 解压 + 宽度盲爆，回推真实 (w,h) ===============
+# ============================================================
+
+def validate_by_idat_and_brutewidth(ihdr_cdata, idat_concat, crc_stored):
+    width0 = struct.unpack(">I", ihdr_cdata[0:4])[0]
+    height0 = struct.unpack(">I", ihdr_cdata[4:8])[0]
+    bitdepth = ihdr_cdata[8]
+    color_type = ihdr_cdata[9]
+    tail = ihdr_cdata[8:]
+
+    spp = samples_per_pixel(color_type)
+    if spp is None:
+        raise ValueError(f"Unsupported color type: {color_type}")
+
+    try:
+        raw = zlib.decompress(idat_concat)
+    except Exception as e:
+        print("    [!] IDAT 解压失败：", e)
+        return []
+
+    raw_len = len(raw)
+    candidates = []
+
+    for w in range(MIN_W, MAX_W + 1):
+        bits_per_scanline = spp * bitdepth * w
+        bytes_per_scanline = (bits_per_scanline + 7) // 8
+        row_total = 1 + bytes_per_scanline
+
+        if raw_len % row_total != 0:
+            continue
+
+        h = raw_len // row_total
+        if not (MIN_H <= h <= MAX_H):
+            continue
+
+        # 快速检查 filter byte
+        ok = True
+        K = max(1, h // 50)
+        for r in range(0, h, K):
+            if raw[r * row_total] not in (0, 1, 2, 3, 4):
+                ok = False
+                break
+        if not ok:
+            continue
+
+        # 完整检查
+        for r in range(h):
+            if raw[r * row_total] not in (0, 1, 2, 3, 4):
+                ok = False
+                break
+        if ok:
+            candidates.append((w, h))
+
+    return candidates
+
+
+# ============================================================
+# ============= 原有 CRC 爆破：爆高度 & 爆宽度 ==================
+# ============================================================
+
+def brute_height(cdata, crc_stored, width):
+    tail = cdata[8:]
+    found = []
+    for h in range(MIN_H, MAX_H + 1):
+        new = struct.pack(">I", width) + struct.pack(">I", h) + tail
+        if zlib.crc32(b"IHDR" + new) & 0xffffffff == crc_stored:
+            found.append(h)
+    return found
+
+
+def brute_width(cdata, crc_stored, height):
+    tail = cdata[8:]
+    found = []
+    for w in range(MIN_W, MAX_W + 1):
+        new = struct.pack(">I", w) + struct.pack(">I", height) + tail
+        if zlib.crc32(b"IHDR" + new) & 0xffffffff == crc_stored:
+            found.append(w)
+    return found
+
+
+# ============================================================
+# =========== 新增：生成修复后的 PNG（写新 IHDR） ==============
+# ============================================================
+
+def write_fixed_png(orig_path, chunks, new_width, new_height, new_crc):
+    with open(orig_path, "rb") as f:
+        data = f.read()
+
+    sig = data[:8]
+    out = bytearray()
+    out += sig
+
+    for (length, ctype, cdata, crc_old, off) in chunks:
+        if ctype == b"IHDR":
+            tail = cdata[8:]
+            new_cdata = struct.pack(">I", new_width) + struct.pack(">I", new_height) + tail
+
+            out += struct.pack(">I", len(new_cdata))
+            out += b"IHDR"
+            out += new_cdata
+            out += struct.pack(">I", new_crc)
+        else:
+            out += struct.pack(">I", length)
+            out += ctype
+            out += cdata
+            out += struct.pack(">I", crc_old)
+
+    base = os.path.basename(orig_path)
+    name, ext = os.path.splitext(base)
+
+    out_path = os.path.join(
+        os.path.dirname(orig_path),
+        f"{name}_fixed_w{new_width}_h{new_height}.png"
+    )
+
+    with open(out_path, "wb") as f:
+        f.write(out)
+
+    print(f"    [+] 已生成修复 PNG: {out_path}")
+
+
+# ============================================================
+# =========== 新增：统一处理候选宽高 + 输出 CRC ================
+# ============================================================
+
+def finalize_candidates(path, chunks, candidates, ihdr_cdata):
+    if not candidates:
+        print("    [!] 未找到可用宽高")
+        return
+
+    print("\n    [+] 最终宽高候选列表：\n")
+
+    tail = ihdr_cdata[8:]
+
+    for (w, h) in candidates:
+        new_ihdr = struct.pack(">I", w) + struct.pack(">I", h) + tail
+        new_crc = zlib.crc32(b"IHDR" + new_ihdr) & 0xffffffff
+
+        print(f"        - w={w}, h={h}, CRC=0x{new_crc:08X}")
+
+        write_fixed_png(path, chunks, w, h, new_crc)
+
+
+# ============================================================
+# ==================== 主 PNG 分析流程 ========================
+# ============================================================
+
+def analyze_png(path):
+    with open(path, "rb") as f:
+        data = f.read()
+
+    chunks = parse_chunks(data)
+    idat_concat = concat_idat(chunks)
+
+    for length, ctype, cdata, crc_stored, off in chunks:
+        if ctype != b"IHDR":
+            continue
+
+        width = struct.unpack(">I", cdata[0:4])[0]
+        height = struct.unpack(">I", cdata[4:8])[0]
+        crc_calc = zlib.crc32(b"IHDR" + cdata) & 0xffffffff
+
+        print(f"\n==================================================")
+        print(f"[!] IHDR 文件: {path}")
+        print(f"    IHDR 宽度: {width}, 高度: {height}")
+        print(f"    CRC(存储): 0x{crc_stored:08X}")
+        print(f"    CRC(计算): 0x{crc_calc:08X}")
+
+        # CRC 不匹配 → 做爆破（原有逻辑）
+        if crc_calc != crc_stored:
+            print("    [*] CRC 不匹配 → 执行 CRC 爆破")
+
+            hs = brute_height(cdata, crc_stored, width)
+            ws = []
+
+            if hs:
+                candidates = [(width, h) for h in hs]
+            else:
+                ws = brute_width(cdata, crc_stored, height)
+                if ws:
+                    candidates = [(w, height) for w in ws]
+                else:
+                    print("    [!] CRC爆破失败，无法恢复尺寸")
+                    return
+
+            finalize_candidates(path, chunks, candidates, cdata)
+            return
+
+        # CRC 匹配 → 防篡改：用 IDAT 校验真实尺寸
+        print("    [*] CRC 匹配，但可能被篡改 → 用 IDAT 盲爆校验真实尺寸")
+
+        candidates = validate_by_idat_and_brutewidth(cdata, idat_concat, crc_stored)
+
+        if candidates:
+            print("    [+] IDAT 校验得到可能真实尺寸：", candidates)
+        else:
+            print("    [-] IDAT 校验失败 → 回退 CRC 爆破")
+
+            hs = brute_height(cdata, crc_stored, width)
+            ws = brute_width(cdata, crc_stored, height)
+
+            candidates = [(width, h) for h in hs] + [(w, height) for w in ws]
+
+        finalize_candidates(path, chunks, candidates, cdata)
+        return
+
+
+# ============================================================
+# ======================= 扫描目录 ============================
+# ============================================================
+
+def main():
+    print("扫描 img/ 目录中的 PNG 文件...\n")
+    for fn in os.listdir(IMG_DIR):
+        path = os.path.join(IMG_DIR, fn)
+        if not os.path.isfile(path):
+            continue
+        with open(path, "rb") as f:
+            if not f.read(8).startswith(PNG_SIG):
+                continue
+        analyze_png(path)
+
+
+if __name__ == "__main__":
+    main()
+```
+![](/assets/img/blog/20251128/misc34_fixed_w1123_h173.png)     
+**flag：** <kbd>ctfshow{03e102077e3e5de9dd9c04aba16ef014}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
