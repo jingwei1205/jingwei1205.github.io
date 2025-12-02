@@ -50,22 +50,22 @@ image:
 **logic:** 打开一看6个txt，全部丢进010过一遍，对比魔数，改成相应的文件扩展名即可看到flag，然后将6张图片的信息串起来就是flag。  
 **flag：** <kbd>ctfshow{4314e2b15ad9a960e7d9d8fcff902da}</kbd>
 ### 3. 图片篇(信息附加) WriteUp
-#### 2.5 Misc5.png
+#### 3.5 Misc5.png
 **锐评：** 什么！there is no flag！你说no就no？继续炼丹！  
 **logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c\*t\*f，f\*l\*a\*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件末尾（当然各位师傅眼力好直接就能看到）  
 ![](/assets/img/blog/20251128/misc5.png)  
 **flag：** <kbd>ctfshow{2a476b4011805f1a8e4b906c8f84083e}</kbd>
-#### 2.6 Misc6.png
+#### 3.6 Misc6.png
 **锐评：** 什么！看不起我？一样的题出两遍？  
 **logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c\*t\*f，f\*l\*a\*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件中间（当然各位师傅眼力好也得看花了这次，真到中间了）
 ![](/assets/img/blog/20251128/misc6.png)  
 **flag：** <kbd>ctfshow{d5e937aefb091d38e70d927b80e1e2ea}</kbd>
-#### 2.7 Misc7.jpg
+#### 3.7 Misc7.jpg
 **锐评：** 这知识点出三遍？质疑我们智商吗，其实这个让我们加深了肌肉记忆，拿进来先扔010，看文件格式魔数是否正确，再搜索文件信息是否含有关键信息。  
 **logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c\*t\*f，f\*l\*a\*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件中间（听我的别用你的眼睛了）
 ![](/assets/img/blog/20251128/misc7.png)  
 **flag：** <kbd>ctfshow{c5e77c9c289275e3f307362e1ed86bb7}</kbd>
-#### 2.8 Misc8.png
+#### 3.8 Misc8.png
 **锐评：** 我排在别人后面你就看不到我，你个小丑，略略略有本事你来找我噻！   
 **logic:** 扔进010中对比魔数正确，搜索ascii字符中没有关键字，乃么好嘞，死哈一只了，不我还能抢救，彩色没有未来，黑白窗口给我力量，打开kali输入<kbd>binwalk misc8.png</kbd>，发现里面藏了两张png图片，此时使用<kbd>foremost misc8.png</kbd>，在桌面上out文件夹中会获得两张图片，一张就是flag啦！你会问，你不是linux吗为啥在桌面上，那当然我用的wsl啦，强推wsl比虚拟机好用一万倍！windows用户专属福利噢！
 ![](/assets/img/blog/20251128/misc8-1.png)  
@@ -77,32 +77,32 @@ dd if=misc8.png of=flag.png bs=1 skip=3892
 ![](/assets/img/blog/20251128/misc8-2.png) 
 **flag：** <kbd>ctfshow{1df0a9a3f709a2605803664b55783687}</kbd>
 
-#### 2.9 Misc9.png
+#### 3.9 Misc9.png
 **锐评：** 不想评价，可能出题人觉得我们太菜了，需要题海战术。   
 **logic:** 使用010editor打开文件，<kbd>ctrl+f</kbd>搜索ctfshow即可获得flag。  
 ![](/assets/img/blog/20251128/misc9.png) 
 **flag：** <kbd>ctfshow{5c5e819508a3ab1fd823f11e83e93c75}</kbd>
-#### 2.10 Misc10.png
+#### 3.10 Misc10.png
 **锐评：** keybots解体！好啊，你又背着我藏私房旗。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），这里有个地方会给你误导，就是他有两个idat块，使用tweakpng合体后发现无事发生，便感觉不妙，这肯定是藏文件了，遂奔向binwalk的怀抱，一bin一个不吱声，果然发现里面有zip包，直接<kbd>binwalk -e misc10.png --run-as=root</kbd>梭出来，使用grep或者strings命令查找字符串。  
 ![](/assets/img/blog/20251128/misc10-1.png) 
 ![](/assets/img/blog/20251128/misc10-2.png) 
 ![](/assets/img/blog/20251128/misc10-3.png) 
 **flag：** <kbd>ctfshow{353252424ac69cb64f643768851ac790}</kbd>
-#### 2.11 Misc11.png
+#### 3.11 Misc11.png
 **锐评：** 乃悟前狼假寐，盖以诱敌。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），binwalk发现有隐藏文件，但是解出后并无flag信息，此时继续从010找答案，发现两个IDAT数据块，将第一个数据块使用tweakpng删除后保存即可得到flag。  
 **theory：**IDAT 块只有当上一个块充满（正常length最大65524）时，才会继续一个新的块。程序读取图像的时候也会在第一个未满的块停止（查了下W3C标准，其实是PNG图片在压缩的时候会在最后一个块的标记位标明这是最后一个数据块）。所以如果某一块没有满但后面却还有 IDAT 块则说明后面的块是“假”的，这里发现第一个数据块根本没有填满就有另一个。
 ![](/assets/img/blog/20251128/misc11-1.png)   
 ![](/assets/img/blog/20251128/misc11.png)   
 **flag：** <kbd>ctfshow{44620176948fa759d3eeafeac99f1ce9}</kbd>
-#### 2.12 Misc12.png
+#### 3.12 Misc12.png
 **锐评：** 乃悟前狼们假寐，盖以诱敌。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），binwalk发现无隐藏文件，此时继续从010找答案，发现数个IDAT数据块，每块都不满就有下一块，使用tweakpng整合后在使用binwalk发现两个zlib文件，但是使用binwalk -e解包出来后发现无flag，考虑将第一个zlib部分删除，共 3149-41 = 3108，将未合并的图片使用tweakpng打开后发现前8IDAT刚好长度为3108，删除后重新保存图片获得flag。
 ![](/assets/img/blog/20251128/misc12-1.png)   
 ![](/assets/img/blog/20251128/misc12-2.png)   
 **flag：** <kbd>ctfshow{10ea26425dd4708f7da7a13c8e256a73}</kbd>
-#### 2.13 Misc13.png
+#### 3.13 Misc13.png
 **锐评：** 小时候玩过跳房子吗，有些地方不能踩噢。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），可以搜到c\*t\*f的关键词（我上面的题目疯狂暗示噢，夹花搜也有可能），发现每个关键部分隔了一个字符，将字符记录下来写python脚本解出flag。将所有可以字符串复制到脚本中解出，发现有三个flag是一致的，有一个flag不一样，将两个flag分别提交后即可。
 ![](/assets/img/blog/20251128/misc13-1.png)   
@@ -120,7 +120,7 @@ for key_str in interval_str:
     print("第", interval_str.index(key_str) + 1, "个可疑字符串隐藏的flag:", result)
 ```
 **flag：** <kbd>ctfshow{ae6e46c48f739b7eb2d1de6e412f839a}</kbd>
-#### 2.14 Misc14.jpg
+#### 3.14 Misc14.jpg
 **锐评：** 还是那头狼假寐诱敌，但是这次的猎物是jpg。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），binwalk发现隐藏文件，使用binwalk -e解包无果，考虑使用以下命令将第二幅jepg前部分删除。
 ![](/assets/img/blog/20251128/misc14-1.png)   
@@ -129,39 +129,39 @@ dd if=misc14.jpg of=result.jpg bs=1 skip=$((0x837))
 ```
 ![](/assets/img/blog/20251128/misc14-2.jpg)   
 **flag：** <kbd>ctfshow{ce520f767fc465b0787cdb936363e694}</kbd>
-#### 2.15 Misc15.bmp
+#### 3.15 Misc15.bmp
 **锐评：** 别人能藏的地方我也能藏，谁还不是二进制动物啦。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），搜索到ctf关键词得到flag。
 ![](/assets/img/blog/20251128/misc15-1.png)   
 **flag：** <kbd>ctfshow{fbe7bb657397e6e0a6adea3e40265425}</kbd>
-#### 2.16 Misc16.png
+#### 3.16 Misc16.png
 **锐评：** 别人能藏的地方我也能藏，谁还不是二进制动物啦。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），无果上binwalk，发现有文件隐藏，直接使<kbd>用binwalk -e misc16.png --run-as=root</kbd>提取得到文件，使用grep命令搜索ctf关键词得到了flag。
 ![](/assets/img/blog/20251128/misc16-1.png)   
 ![](/assets/img/blog/20251128/misc16-2.png)   
 **flag：** <kbd>ctfshow{a7e32f131c011290a62476ae77190b52}</kbd>
-#### 2.17 Misc17.png
+#### 3.17 Misc17.png
 **锐评：** 宝儿，你不是我亲生的，你的DNA是89 50 4E 47，你是png的孩子。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），无果上binwalk，发现有文件隐藏，直接使<kbd>用binwalk -e misc17.png --run-as=root</kbd>提取得到文件无果，考虑合并IDAT后再使用binwalk扫描提取文件发现藏了一个zip，使用同样命令分离后，无法使用grep找到flag，将每个文件丢到010发现有个文件的魔数为png，修改后缀名即可。
 ![](/assets/img/blog/20251128/misc17-1.png)   
 ![](/assets/img/blog/20251128/misc17-2.png)   
 **flag：** <kbd>ctfshow{0fe61fc42e8bbe55b9257d251749ae45}</kbd>
-#### 2.18 Misc18.jpg
+#### 3.18 Misc18.jpg
 **锐评：** 你出生时有些事情就决定好了，例如像你们出生就是富二代。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），搜到ctf关键词但是发现断断续续的，而且有很多adobe的属性内容，考虑查看属性，使用exiftool命令查看。但是直接使用右键在windows上查看属性，不用排序，直接按照显示顺序输入即可。
 ![](/assets/img/blog/20251128/misc18.png)    
 **flag：** <kbd>ctfshow{325d60c208f728ac17e5f02d4cf5a839}</kbd>
-#### 2.19 Misc19.tif
+#### 3.19 Misc19.tif
 **锐评：** 但是有些人出生就是富二代，他爸妈却没告诉他。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），搜到ctf关键词但是发现断的，两段拼起来即可。
 ![](/assets/img/blog/20251128/misc19.png)    
 **flag：** <kbd>ctfshow{c97964b1aecf06e1d79c21ddad593e42}</kbd>
-#### 2.20 Misc20.jpg
+#### 3.20 Misc20.jpg
 **锐评：** 少小离家老大回，乡音无改鬓毛衰。有些口音你生下来就会了改不了，让我们感叹母语迸发的力量。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现一段离谱的中文，接下来你只要读出来这段中文，flag就从你嘴巴里出来了，若你不会中文，这道题就跳过吧。
 ![](/assets/img/blog/20251128/misc20.png)    
 **flag：** <kbd>ctfshow{c97964b1aecf06e1d79c21ddad593e42}</kbd>
-#### 2.21 Misc21.jpg
+#### 3.21 Misc21.jpg
 **锐评：** 。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现一段序列串，将这个序列串复制到字符串自动映射的[**网站**](https://www.rapidtables.com/convert/number/ascii-hex-bin-dec-converter.html)，发现asicii码解出来是有意义的，要把所有的X和Y变成16进制组合在一起，写脚本解决。
 ![](/assets/img/blog/20251128/misc21-2.png)    
@@ -173,7 +173,7 @@ result = "ctfshow{" + "".join(format(d, "x") for d in data) + "}"
 print(result)
 ``` 
 **flag：** <kbd>ctfshow{e8a221494084eb518d5c073bb1a1686d}</kbd>
-#### 2.22 Misc22.jpg
+#### 3.22 Misc22.jpg
 **锐评：** 有的人表面黑白分明，刚正不阿，很高大的样子，其实他把黄黄的内心藏在了小小的图里，不仔细看真看不出来你是这样的人。  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现有缩略图<kbd>Thumbnail Image                 : (Binary data 8201 bytes, use -b option to extract)</kbd>，提示使用exiftool -b提取，主打一个听人劝使用以下命令提取得到缩略图，黄色字就是flag。
 ![](/assets/img/blog/20251128/misc22.png)    
@@ -181,7 +181,7 @@ print(result)
 exiftool -b -ThumbnailImage misc22.jpg > thumb.jpg
 ``` 
 **flag：** <kbd>ctfshow{dbf7d3f84b0125e833dfd3c80820a129}</kbd>
-#### 2.23 Misc23.psd
+#### 3.23 Misc23.psd
 **锐评：** 看清楚是psd，不是ptsd，因为经过时间长了少了time就不pstd了，我没t，我没t，恐龙抗狼抗狼抗！  
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），使用binwalk发现无隐藏文件，使用exiftool发现有getflag的提示，需要将时间戳从十进制转为十六进制就可以得到flag啦，发现修改历史中有很多时间戳，转为long类型时间戳后转十六进制即可获得。
 ![](/assets/img/blog/20251128/misc23.png)    
@@ -225,13 +225,13 @@ def deal_time():
 deal_time()
 ``` 
 **flag：** <kbd>ctfshow{3425649ea0e31938808c0de51b70ce6a}</kbd>
-#### 2.41 Misc41.jpg
+#### 3.41 Misc41.jpg
 **锐评：** 听说只有愚人节的愚人才能cosplay这道旗，H4ppy Apr1l F001's D4y！   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），如果题目想戏耍你就肯定给你很多误解，你会发现图片都打不开，FOOL = F001？？？，喜欢cosplay是吧，那我就highlight所有愚人，看你们排的什么队！
 ![](/assets/img/blog/20251128/misc41.png)     
 **flag：** <kbd>ctfshow{fcbd427caf4a52f1147ab44346cd1cdd}</kbd>
 ### 4. 图片篇(文件结构) WriteUp
-#### 2.24 Misc24.bmp
+#### 4.24 Misc24.bmp
 **锐评：** 听说站得高看得远，那我长得高是不是也能看到一样的风景。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现文件结构全是FF，使用binwalk也未发现隐藏文件，使用exiftool发现该图片字节数、比特位和大小，通过以下公式
 $$
@@ -240,7 +240,7 @@ $$
 计算后发现图片高度不对，遂查看数据块长度为675002B，24 bit位图，宽为900，计算高度为250，在010中修改高度得到图片
 ![](/assets/img/blog/20251128/misc24.bmp)     
 **flag：** <kbd>ctfshow{dd7d8bc9e5e873eb7da3fa51d92ca4b7}</kbd>
-#### 2.25 Misc25.png
+#### 4.25 Misc25.png
 **锐评：** 听说蹲下来才能拍出更美的照片。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现一切照旧，使用binwalk，exiftool未发现异常，考虑到是png，校验crc值，crc值010打开后12-28的字节，通过[**网站校验**](https://www.ip33.com/crc.html)发现问题，怀疑图片大小有问题，爆破高度，得到250，修改高度即可。
 ```python
@@ -350,37 +350,32 @@ if __name__ == "__main__":
 ```
 ![](/assets/img/blog/20251128/misc25.png)     
 **flag：** <kbd>ctfshow{494f611cc5842dd597f460874ce38f57}</kbd>
-#### 2.26 Misc26.png
+#### 4.26 Misc26.png
 **锐评：** 你不会造轮子，还不会用轮子吗。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现一切照旧，使用binwalk，exiftool未发现异常，考虑到是png，校验crc值，crc值010打开后12-28的字节，通过[**网站校验**](https://www.ip33.com/crc.html)发现问题，怀疑图片大小有问题，爆破高度，得到606，修改高度即可，然后将高度变成16进制数就可以拼。（偷偷告诉你可以使用上题的脚本一把梭出高度噢）
 ![](/assets/img/blog/20251128/misc26.png)     
 **flag：** <kbd>ctfshow{94aef125e087a7ccf2e28e742efd704c}</kbd>
-#### 2.27 Misc27.png
+#### 4.27 Misc27.png
 **锐评：** 你不会造轮子，还不会用轮子吗。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现一切照旧，使用binwalk，exiftool未发现异常，考虑到是png，校验crc值，crc值010打开后12-28的字节，通过[**网站校验**](https://www.ip33.com/crc.html)发现问题，怀疑图片大小有问题，爆破高度，得到606，修改高度即可，然后将高度变成16进制数就可以拼。（偷偷告诉你可以使用上题的脚本一把梭出高度噢）
 ![](/assets/img/blog/20251128/misc27.jpg)     
 **flag：** <kbd>ctfshow{94aef125e087a7ccf2e28e742efd704c}</kbd> 
-#### 2.28 Misc28.gif
+#### 4.28 Misc28.gif
 **锐评：** 敌不动我不动。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），先不急着上kali，由于是gif文件，需要先尝试分离帧，使用[**在线网站分离预览**](https://www.ufreetools.com/zh/tool/gif-frame-extractor)，发现只有一帧，考虑改变高度，切记将LocalScreenDescribtor与Data块中所有ImageDescribtor中的高度都要更改，否则无法显示部分帧的高度导致关键flag会遗漏。
 ![](/assets/img/blog/20251128/misc28.gif)     
 **flag：** <kbd>ctfshow{59c8bc525426166b1c893fe12a387fd7}</kbd>
-#### 2.28 Misc28.gif
-**锐评：** 敌不动我不动。   
-**logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），先不急着上kali，由于是gif文件，需要先尝试分离帧，使用[**在线网站分离预览**](https://www.ufreetools.com/zh/tool/gif-frame-extractor)，发现只有一帧，考虑改变高度，切记将LocalScreenDescribtor与Data块中所有ImageDescribtor中的高度都要更改，否则无法显示部分帧的高度导致关键flag会遗漏。
-![](/assets/img/blog/20251128/misc28.gif)     
-**flag：** <kbd>ctfshow{59c8bc525426166b1c893fe12a387fd7}</kbd>
-#### 2.29 Misc29.gif
+#### 4.29 Misc29.gif
 **锐评：** 敌乱动我乱动。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），先不急着上kali，由于是gif文件，需要先尝试分离帧，使用[**在线网站分离预览**](https://www.ufreetools.com/zh/tool/gif-frame-extractor)，发现多帧，但是移动到下方的时候考虑下方还有东西，尝试着改变高度，切记将LocalScreenDescribtor与Data块中所有ImageDescribtor中的高度都要更改，否则无法显示部分帧的高度导致关键flag会遗漏，重新送到帧分离器中发现其中第8帧含有flag，写入即可。
 ![](/assets/img/blog/20251128/misc29.png)     
 **flag：** <kbd>ctfshow{03ce5be6d60a4b3c7465ab9410801440}</kbd>
-#### 2.30 Misc30.bmp
+#### 4.30 Misc30.bmp
 **锐评：** 看清题目再做题，我打赌有人直接做题。   
 **logic:** 使用010editor打开文件直接按照提示修改宽度为950，宽度英文为width不是height。
 ![](/assets/img/blog/20251128/misc30.bmp)     
 **flag：** <kbd>ctfshow{6db8536da312f6aeb42da2f45b5f213c}</kbd>
-#### 2.31 Misc31.bmp
+#### 4.31 Misc31.bmp
 **锐评：** 听说拉伸之后眼神也会变好。   
 **logic:** 使用010editor打开文件搜打撤无果，发现数据块该图片字节数、比特位和大小，通过以下公式
 $$
@@ -389,7 +384,7 @@ $$
 计算后发现图片高度不对，遂查看数据块长度为487202B，24 bit位图，高为150，计算宽为1082，在010中修改高度得到图片
 ![](/assets/img/blog/20251128/misc31.bmp)     
 **flag：** <kbd>ctfshow{fb09dcc9005fe3feeefb73646b55efd5}</kbd>
-#### 2.32 Misc32.png
+#### 4.32 Misc32.png
 **锐评：** C4爆破！什么C4，cs玩多了？是CRC。   
 **logic:** 使用010editor打开文件搜打撤无果，校验CRC发生问题，提示告诉高度正确，爆破宽度1044，在010中修改高度得到图片,给出一个自动校验CRC与先后爆破高度和宽度的代码,直接一把梭。
 ```python
@@ -537,7 +532,7 @@ if __name__ == "__main__":
 ```
 ![](/assets/img/blog/20251128/misc32.png)     
 **flag：** <kbd>ctfshow{fb09dcc9005fe3feeefb73646b55efd5}</kbd>
-#### 2.33 Misc33.png
+#### 4.33 Misc33.png
 **锐评：** 长宽都不知道我怎么知道你有没有规矩。   
 **logic:** 使用010editor打开文件搜打撤，发现crc校验失败，直接按照提示分别爆破长宽，得到的长宽为（978，142），将以上脚本改进可以得到png crc问题的一把梭脚本。
 ```python
@@ -698,7 +693,7 @@ if __name__ == "__main__":
 ```
 ![](/assets/img/blog/20251128/misc33.png)     
 **flag：** <kbd>ctfshow{03070a10ec3a3282ba1e352f4e07b0a9}</kbd>
-#### 2.30 Misc30.bmp
+#### 4.34 Misc34.png
 **锐评：** 如果你束手无策，你会干什么，你问什么屁话，当然是束手。   
 **logic:** 由于这道题长宽全部被篡改，连crc都被改了，上面基于crc的爆破方式无法使用，只能另谋出路，IDAT 解压后长度 = (每行字节数+1) * 高度
 → 已知长度 + 猜宽 → 可推高度，filter byte 校验保证每行格式合法，CRC 校验保证 chunk 内容正确（如果 CRC 被篡改，需要先暴力爆破），最终写入新文件保证 IHDR 和 CRC 与真实数据一致，基于以上原理暴力破解，使用如下代码直接输出带有flag的图片，别忘记得到宽高后还有基于宽高修改对应的CRC值噢，不然打不开。
