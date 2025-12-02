@@ -30,7 +30,7 @@ image:
 |  10   |                Python                | 编写脚本解题的关键语言，简单库多，解题的不二语言，推荐使用pycharm中的jupyterbook，代码补全 |       python env        |
 
 
-### 2. WriteUp
+### 2. 图片篇(基础操作) WriteUp
 #### 2.1 Misc1.png
 **锐评：** 不是每道题都有锐评，但是如果ctf竞赛也出这种题是不是就拼手速抢分了，恭喜您拿到了新手福利，下载后直接两眼一瞪，这不是我苦苦寻觅的flag吗，怎么直接就出来了，一定是假的，一定是假的！  
 ![misc1](/assets/img/blog/20251128/misc1.png)  
@@ -49,6 +49,7 @@ image:
 **锐评：** 同样的技能我要放六次，你接住喽！甭管什么妖怪，先进我的010炼丹炉，道生一，一生二，二生万物！  
 **logic:** 打开一看6个txt，全部丢进010过一遍，对比魔数，改成相应的文件扩展名即可看到flag，然后将6张图片的信息串起来就是flag。  
 **flag：** <kbd>ctfshow{4314e2b15ad9a960e7d9d8fcff902da}</kbd>
+### 3. 图片篇(信息附加) WriteUp
 #### 2.5 Misc5.png
 **锐评：** 什么！there is no flag！你说no就no？继续炼丹！  
 **logic:** 扔进010中搜索ascii字符中是否包含flag的关键字（ctfshow的关键字当然是ctfshow，也有可能c\*t\*f，f\*l\*a\*g，出题人就是那么喜欢跳格子），本题直接搜到ctfshow在文件末尾（当然各位师傅眼力好直接就能看到）  
@@ -229,6 +230,7 @@ deal_time()
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），如果题目想戏耍你就肯定给你很多误解，你会发现图片都打不开，FOOL = F001？？？，喜欢cosplay是吧，那我就highlight所有愚人，看你们排的什么队！
 ![](/assets/img/blog/20251128/misc41.png)     
 **flag：** <kbd>ctfshow{fcbd427caf4a52f1147ab44346cd1cdd}</kbd>
+### 4. 图片篇(文件结构) WriteUp
 #### 2.24 Misc24.bmp
 **锐评：** 听说站得高看得远，那我长得高是不是也能看到一样的风景。   
 **logic:** 使用010editor打开文件搜打撤（搜flag关键词，打量一遍文件魔数与文件结构，无果撤离上kali），发现文件结构全是FF，使用binwalk也未发现隐藏文件，使用exiftool发现该图片字节数、比特位和大小，通过以下公式
