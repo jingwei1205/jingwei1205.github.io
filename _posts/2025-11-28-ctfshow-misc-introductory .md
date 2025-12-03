@@ -979,4 +979,72 @@ if __name__ == "__main__":
 ```
 ![](/assets/img/blog/20251128/misc34_fixed_w1123_h173.png)     
 **flag：** <kbd>ctfshow{03e102077e3e5de9dd9c04aba16ef014}</kbd>
+#### 4.35 Misc35.jpg
+**锐评：** 太宽了广角都拍不下。   
+**logic:** 使用010editor打开文件搜打撤无果，binwalk无嵌套，exiftool无信息，一看一片空白尝试修改高度500发现有抽象字体的，这种一般是由于宽度有问题，爆破宽度生成图片放在目录下，人眼检索，发现993-1000区间内的宽度都可以看到flag的。
+![](/assets/img/blog/20251128/misc_35_fixed_1000.jpg)     
+**flag：** <kbd>ctfshow{ca35201ca9ed607e5a68f44ef573fbc3}</kbd>
+#### 4.36 Misc36.gif
+**锐评：** live也不行塞不下。   
+**logic:** 使用010editor打开文件搜打撤无果，binwalk无嵌套，exiftool无信息，一看一片空白尝试修改高度500发现有抽象字体的，这种一般是由于宽度有问题，爆破宽度生成图片放在目录下，人眼检索，发现941宽度可以看到flag。
+![](/assets/img/blog/20251128/misc_36_941.gif)     
+**flag：** <kbd>ctfshow{1ebf739f832906d60f57436b8179166f}</kbd>
+#### 4.37 Misc37.gif
+**锐评：** 天下武功，唯快不破   
+**logic:** 使用010editor打开文件搜打撤无果，使用bandiview逐帧查看，发现flag。
+**flag：** <kbd>ctfshow{2056782cd57b13261dcbbe3d6eecda17}</kbd>
+#### 4.38 Misc38.gif
+**锐评：** 天下武功，唯快不破   
+**logic:** 使用010editor打开文件搜打撤无果，使用bandiview逐帧查看，发现flag。
+**flag：** <kbd>ctfshow{48b722b570c603ef58cc0b83bbf7680d}</kbd>
+#### 4.38 Misc39.gif
+**锐评：** 如果我每隔段时间就会成为你妻，你还会爱我吗？   
+**logic:** 使用010editor打开文件搜打撤无果，使用bandiview查看，发现帧数很多排除藏帧法，考虑时间间隔和笔仙隐写法，使用identify命令提取间隔时间，发现全为36，37，将其转换为01后得到字节流，将字节流解码发现ascii码位数不对可能是7位表示法，写脚本解出了flag。
+```shell
+identify -format "%T," misc39.gif | sed 's/,$/\n/'
+```
+```python
+def decode_7bit_binary(bitstring):
+    # 去除空格等杂字符
+    bitstring = ''.join(c for c in bitstring if c in "01")
+
+    # 按 7 位分组
+    chars = []
+    for i in range(0, len(bitstring), 7):
+        chunk = bitstring[i:i+7]
+        if len(chunk) < 7:
+            break
+        chars.append(chr(int(chunk, 2)))
+
+    return ''.join(chars)
+
+
+# 示例使用
+bits = "11000111110100110011011100111101000110111111101111111011011010101100100111000011000101100101100110110011001110010111001011010111001101100010011011111000101100101011001001101100111000110010001110010110110011001111000010111001110010111000101100011110000101100000110100011010101110011111101"
+
+print(decode_7bit_binary(bits))
+```
+![](/assets/img/blog/20251128/misc39.png)   
+**flag：** <kbd>ctfshow{52812ff995fb7be268d963a9ebca0459}</kbd>
+#### 4.40 Misc40.png
+**锐评：** 只有你gif会动吗，我png也能随歌起舞！   
+**logic:** 使用010editor打开文件搜打撤无果，提取图片帧无相关信息，考虑时间间隔问题，可以使用apng相关工具提取，或者使用以下脚本一把梭。
+```shell
+apngdis misc40.png out
+grep delay out*.txt | awk -F'[=/ ]' '{print $2}' | paste -sd "," -
+```
+```python
+import apng
+apng_file = "misc40.png"
+apng_data = apng.APNG.open(apng_file)
+ascii_chars = ""
+for i, (_, control) in enumerate(apng_data.frames):
+    if 32 <= control.delay <= 127:
+        ascii_char = chr(control.delay)
+        ascii_chars += ascii_char
+        print(f"Frame {i+1} delay: {control.delay} ({ascii_char})")
+print("拼接的ASCII字符:", ascii_chars)
+```
+![](/assets/img/blog/20251128/misc40.png)   
+**flag：** <kbd>ctfshow{95ca0297dff0f6b1bdaca394a6fcb95b}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
