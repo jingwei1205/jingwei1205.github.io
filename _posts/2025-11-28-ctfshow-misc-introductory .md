@@ -1047,4 +1047,388 @@ print("拼接的ASCII字符:", ascii_chars)
 ```
 ![](/assets/img/blog/20251128/misc40.png)   
 **flag：** <kbd>ctfshow{95ca0297dff0f6b1bdaca394a6fcb95b}</kbd>
+#### 4.42 Misc42.png
+**锐评：** 有没有一种可能flag和我一样长！   
+**logic:** 使用010editor打开文件搜打撤无果，非apng动图，校验crc宽高都没有发现任何问题，细心的人可能发现了这次IDAT块很多，而且每块都不满，flag可能藏在这儿，发现每块的长度都位于阿斯克玛范围内，考虑获取所有车长度解除ascii码，得到flag结果。
+```shell
+pngcheck -v misc42.png | awk '/IDAT/{print $7}' | paste -sd,
+```  
+```python
+s = [229,152,191,229,152,191,49,99,116,102,115,104,111,119,123,48,55,56,99,98,100,48,102,57,99,56,100,51,102,50,49,53,56,101,55,48,53,50,57,102,56,57,49,51,99,54,53,125]
+for i in s:
+    print(chr(i),end='')
+```
+![](/assets/img/blog/20251128/misc42.png)   
+**flag：** <kbd>ctfshow{078cbd0f9c8d3f2158e70529f8913c65}</kbd>
+#### 4.43 Misc43.png
+**锐评：** 错错错是我的错，热恋的时候怎么不说你是对的！   
+**logic:** 使用010editor打开文件搜打撤无果，apng动图，校验crc宽高都没有发现每个IDAT块CRC全错，而且每块都不满，flag可能藏在这儿，将每块错误的crc拼接起来转换ascii码，得到flag结果。可以使用以下脚本迅速取到相关信息。
+```python
+# -*- coding: utf-8 -*-
+"""
+APNG / PNG CRC Analyzer for Jupyter Notebook
+"""
+
+import struct
+import zlib
+
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+def read_chunks(f):
+    """逐个解析 PNG/APNG chunk"""
+    offset = f.tell()
+    while True:
+        header = f.read(8)
+        if len(header) < 8:
+            return
+        length, ctype = struct.unpack(">I4s", header)
+        data = f.read(length)
+        crc_bytes = f.read(4)
+        if len(data) < length or len(crc_bytes) < 4:
+            return
+        crc = struct.unpack(">I", crc_bytes)[0]
+        yield (length, ctype, data, crc, offset)
+        offset = f.tell()
+
+def compute_crc_data(chunk_type, data):
+    """计算完整 CRC"""
+    return zlib.crc32(data, zlib.crc32(chunk_type)) & 0xffffffff
+
+def analyze_apng_idat_crc(path):
+    """
+    分析 APNG/PNG 文件的 IDAT/fdAT CRC
+    返回：length_crc_list, lengths, crcs_calc, crcs_orig
+    """
+    print(f"Analyzing: {path}\n")
+
+    length_crc_list = []  # (length, 正确 CRC)
+    lengths = []          # IDAT/fdAT 长度
+    crcs_calc = []        # 计算 CRC
+    crcs_orig = []        # 文件中原始 CRC
+
+    with open(path, "rb") as f:
+        sig = f.read(8)
+        if sig != PNG_SIGNATURE:
+            raise ValueError("Not a valid PNG/APNG file.")
+
+        print("===== IDAT/fdAT CRC =====")
+        for length, ctype, data, crc_orig, offset in read_chunks(f):
+            if ctype == b"IDAT":
+                crc_calc = compute_crc_data(ctype, data)
+                length_crc_list.append((length, crc_calc))
+                lengths.append(length)
+                crcs_calc.append(crc_calc)
+                crcs_orig.append(crc_orig)
+                print(f"Offset 0x{offset:08X} | Length {length:6d} | CRC(orig)=0x{crc_orig:08X} | CRC(calc)=0x{crc_calc:08X}")
+
+            elif ctype == b"fdAT":
+                seq = struct.unpack(">I", data[:4])[0]
+                real_data = data[4:]
+                crc_calc = compute_crc_data(b"IDAT", real_data)
+                length_crc_list.append((length, crc_calc))
+                lengths.append(length)
+                crcs_calc.append(crc_calc)
+                crcs_orig.append(crc_orig)
+                print(f"Offset 0x{offset:08X} | Seq={seq:5d} | Length {length:6d} | CRC(orig)=0x{crc_orig:08X} | CRC(calc)=0x{crc_calc:08X}")
+
+    # 打印列表和逗号分隔字符串
+    print("\n===== Separate Lists =====")
+    print("Lengths   :", lengths)
+    print("CRC(calc) :", crcs_calc)
+    print("CRC(orig) :", crcs_orig)
+
+    length_str = "".join(map(str, lengths))
+    crc_calc_str = "".join(map(lambda x: f"{x:08X}", crcs_calc))
+    crc_orig_str = "".join(map(lambda x: f"{x:08X}", crcs_orig))
+
+    print("\nComma-separated strings:")
+    print("Length string  :", length_str)
+    print("CRC(calc) str  :", crc_calc_str)
+    print("CRC(orig) str  :", crc_orig_str)
+
+    return length_crc_list, lengths, crcs_calc, crcs_orig, length_str, crc_calc_str, crc_orig_str
+
+file_path = "./misc43.png"  # 替换为你的 APNG/PNG 文件路径
+length_crc_list, lengths, crcs_calc, crcs_orig, length_str, crc_calc_str, crc_orig_str = analyze_apng_idat_crc(file_path)
+```
+![](/assets/img/blog/20251128/misc43.png)   
+**flag：** <kbd>ctfshow{6eb2589ffff5e390fe6b87504dbc0892}</kbd>
+#### 4.44 Misc44.png
+**锐评：** 看到true of false你会想到什么呀！   
+**logic:** 使用010editor打开文件搜打撤无果，校验crc宽高有对有错，且idat块有300多个，除以8后约30-40为数据，可能为flag，通过脚本校验crc并生成01字节流串，解码ascii后得到flag。
+```python
+# -*- coding: utf-8 -*-
+"""
+APNG / PNG CRC Analyzer for Jupyter Notebook
+记录每个 IDAT/fdAT CRC 是否正确 (1=正确, 0=错误)
+"""
+
+import struct
+import zlib
+
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+def read_chunks(f):
+    """逐个解析 PNG/APNG chunk"""
+    offset = f.tell()
+    while True:
+        header = f.read(8)
+        if len(header) < 8:
+            return
+        length, ctype = struct.unpack(">I4s", header)
+        data = f.read(length)
+        crc_bytes = f.read(4)
+        if len(data) < length or len(crc_bytes) < 4:
+            return
+        crc = struct.unpack(">I", crc_bytes)[0]
+        yield (length, ctype, data, crc, offset)
+        offset = f.tell()
+
+def compute_crc_data(chunk_type, data):
+    """计算完整 CRC"""
+    return zlib.crc32(data, zlib.crc32(chunk_type)) & 0xffffffff
+
+def analyze_apng_idat_crc(path):
+    """
+    分析 APNG/PNG 文件的 IDAT/fdAT CRC
+    返回：
+      length_crc_list : [(length, 计算CRC)]
+      lengths         : 每个 IDAT/fdAT 长度
+      crcs_calc       : 计算出的 CRC
+      crcs_orig       : 文件中原始 CRC
+      crc_status      : CRC 正确性 (1=正确, 0=错误)
+      length_str      : 长度拼接字符串
+      crc_calc_str    : 计算 CRC 拼接字符串
+      crc_orig_str    : 原始 CRC 拼接字符串
+      status_str      : CRC 正确性拼接字符串
+    """
+    print(f"Analyzing: {path}\n")
+
+    length_crc_list = []
+    lengths = []
+    crcs_calc = []
+    crcs_orig = []
+    crc_status = []
+
+    with open(path, "rb") as f:
+        sig = f.read(8)
+        if sig != PNG_SIGNATURE:
+            raise ValueError("Not a valid PNG/APNG file.")
+
+        print("===== IDAT/fdAT CRC =====")
+        for length, ctype, data, crc_orig, offset in read_chunks(f):
+            if ctype == b"IDAT":
+                crc_calc = compute_crc_data(ctype, data)
+                is_correct = 1 if crc_calc == crc_orig else 0
+
+                length_crc_list.append((length, crc_calc))
+                lengths.append(length)
+                crcs_calc.append(crc_calc)
+                crcs_orig.append(crc_orig)
+                crc_status.append(is_correct)
+
+                print(f"Offset 0x{offset:08X} | Length {length:6d} | CRC(orig)=0x{crc_orig:08X} | CRC(calc)=0x{crc_calc:08X} | Status={is_correct}")
+
+            elif ctype == b"fdAT":
+                seq = struct.unpack(">I", data[:4])[0]
+                real_data = data[4:]
+                crc_calc = compute_crc_data(b"IDAT", real_data)
+                is_correct = 1 if crc_calc == crc_orig else 0
+
+                length_crc_list.append((length, crc_calc))
+                lengths.append(length)
+                crcs_calc.append(crc_calc)
+                crcs_orig.append(crc_orig)
+                crc_status.append(is_correct)
+
+                print(f"Offset 0x{offset:08X} | Seq={seq:5d} | Length {length:6d} | CRC(orig)=0x{crc_orig:08X} | CRC(calc)=0x{crc_calc:08X} | Status={is_correct}")
+
+    # 拼接字符串
+    length_str = ",".join(map(str, lengths))
+    crc_calc_str = ",".join(map(lambda x: f"{x:08X}", crcs_calc))
+    crc_orig_str = ",".join(map(lambda x: f"{x:08X}", crcs_orig))
+    status_str = "".join(map(str, crc_status))
+
+    print("\n===== Summary =====")
+    print("Lengths   :", lengths)
+    print("CRC(calc) :", crcs_calc)
+    print("CRC(orig) :", crcs_orig)
+    print("CRC Status:", crc_status)
+    print("\nComma-separated / Concatenated strings:")
+    print("Length string  :", length_str)
+    print("CRC(calc) str  :", crc_calc_str)
+    print("CRC(orig) str  :", crc_orig_str)
+    print("Status string  :", status_str)
+
+    return length_crc_list, lengths, crcs_calc, crcs_orig, crc_status, length_str, crc_calc_str, crc_orig_str, status_str
+
+
+# 使用示例
+file_path = "./misc44.png"  # 替换为你的 APNG/PNG 文件路径
+result = analyze_apng_idat_crc(file_path)
+```
+![](/assets/img/blog/20251128/misc44.png)   
+**flag：** <kbd>ctfshow{cc1af32bf96308fc1263231be783f69e}</kbd>
+#### 4.45 Misc45.png
+**锐评：** 你能不能曲线救国！   
+**logic:** 使用010editor打开文件搜打撤无果，提取图片帧无相关信息，crc全部正确，看到色彩通道alpha考虑[**转bmp**](https://onlineconvertfree.com/zh/convert-format/png-to-bmp/)，然后binwalk一把梭。这是因为PNG 的数据是压缩 + chunk 封装的，binwalk 不懂 PNG 格式，因此识别到的内容不可靠。BMP 是无压缩原始像素，binwalk 能可靠识别。所以有时候还是要转一下格式再walk。
+![](/assets/img/blog/20251128/misc45.png)   
+**flag：** <kbd>ctfshow{057a722a5587979c34966c2436283e70}</kbd>
+#### 4.46 Misc46.png
+**锐评：** 摩擦摩擦在这光滑的地面上摩擦 摩擦似魔鬼的步伐 一步两步一步两步！   
+**logic:** 看到gif动起来后有之前帧的停留直接考虑到足迹问题，笔仙模式启动，使用identify misc46.gif > 2.txt提取足迹信息，使用python脚本画出来flag。
+```python
+from PIL import Image
+import matplotlib.pyplot as plt
+f = open('2.txt')
+pp = []
+while 1:
+    c = f.readline()
+    if c:
+        s = eval(c.split('+')[1]+','+c.split('+')[2][:2])
+        pp.append(s)
+        print(s)
+        # print(c)
+    else:
+        break
+
+img = Image.new('RGB',(400,70),(255,255,255))
+for i in pp:
+    new = Image.new('RGB',(1,1),(0,0,0))
+    img.paste(new,i)
+plt.imshow(img)
+plt.show()
+```
+![](/assets/img/blog/20251128/misc46.png)   
+**flag：** <kbd>ctfshow{05906b3be8742a13a93898186bc5802f}</kbd>
+#### 4.47 Misc47.png
+**锐评：** 想把我的博客改名为旗踪记了，因为我在寻觅他的脚印。   
+**logic:** 看到动起来后有之前帧的停留直接考虑到足迹问题，笔仙模式启动，使用下面脚本提取足迹信息，使用python脚本画出来flag。
+```python
+from PIL import Image
+import struct
+
+# ----------------------------
+# 第一步：解析 APNG fcTL 坐标写入 2.txt
+# ----------------------------
+def write_apng_offsets_to_txt(png_path, out_txt):
+    data = open(png_path, "rb").read()
+    i = 8  # skip PNG signature
+    out = open(out_txt, "w")
+
+    while i < len(data):
+        length = struct.unpack(">I", data[i:i+4])[0]
+        ctype = data[i+4:i+8]
+
+        if ctype == b"fcTL":
+            content = data[i+8:i+8+length]
+            seq = struct.unpack(">I", content[0:4])[0]
+            x   = struct.unpack(">I", content[12:16])[0]
+            y   = struct.unpack(">I", content[16:20])[0]
+
+            # 按你原来绘图脚本格式写入
+            out.write(f"frame{seq}+{x}+{y}\n")
+
+        i += 12 + length
+
+    out.close()
+    print(f"APNG 坐标已写入 {out_txt}")
+
+
+# ----------------------------
+# 第二步：读取 2.txt 并用你的画布作图
+# ----------------------------
+def draw_flag_from_txt(txt_path):
+    f = open(txt_path)
+    pp = []
+
+    while True:
+        c = f.readline()
+        if c:
+            try:
+                # 保留你原来的解析方式
+                s = eval(c.split('+')[1] + ',' + c.split('+')[2][:2])
+                pp.append(s)
+            except:
+                continue
+        else:
+            break
+
+    img = Image.new('RGB', (400, 70), (255, 255, 255))
+    for i in pp:
+        new = Image.new('RGB', (1, 1), (0, 0, 0))
+        img.paste(new, i)
+
+    import matplotlib.pyplot as plt
+    plt.imshow(img)
+    plt.axis("off")
+    plt.show()
+
+
+# ----------------------------
+# 使用示例
+# ----------------------------
+png_path = "./misc47.png"   # 你的 APNG 文件
+txt_path = "2.txt"
+
+write_apng_offsets_to_txt(png_path, txt_path)
+draw_flag_from_txt(txt_path)
+
+```
+![](/assets/img/blog/20251128/misc47.png)   
+**flag：** <kbd>ctfshow{6d51f85b45a0061754a2776a32cf26c4}</kbd>
+#### 4.48 Misc48.jpg
+**锐评：**    
+**logic:** 使用010editor打开文件搜打撤，发现一段flag的算法脚本，如图所示，猜测表示前32次每个FF的连续个数减1后的16进制，使用以下脚本一把梭。
+```python
+# -*- coding: utf-8 -*-
+"""
+JPG 连续 0xFF 段长度统计并输出十六进制字符串
+"""
+
+def count_ff_segments(file_path):
+    """
+    统计 JPG 文件中连续 0xFF 的长度
+    返回长度列表
+    """
+    segments = []
+    count = 0
+
+    with open(file_path, "rb") as f:
+        for byte in f.read():
+            if byte == 0xFF:
+                count += 1
+            elif count > 0:
+                segments.append(count)
+                count = 0
+
+    if count > 0:
+        segments.append(count)
+
+    return segments
+
+
+def process_segments(segments, n=32):
+    """
+    取前 n 段，长度减 1，并转换为十六进制字符串拼接
+    """
+    selected = segments[:n]
+    processed = [x - 1 for x in selected]
+    hex_str = ''.join(f"{x:x}" for x in processed)
+    return hex_str
+
+
+if __name__ == "__main__":
+    jpg_path = "misc48.jpg"  # 替换为你的 JPG 文件路径
+
+    # 统计连续 FF 段
+    ff_lengths = count_ff_segments(jpg_path)
+
+    # 输出处理后的十六进制串
+    hex_result = process_segments(ff_lengths)
+    print("结果:", f"ctfshow{{{hex_result}}}")
+
+```
+![](/assets/img/blog/20251128/misc48.png)   
+**flag：** <kbd>ctfshow{0cb07add909d0d60a92101a8b5c7223a}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
