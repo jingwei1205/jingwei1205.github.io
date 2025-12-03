@@ -1431,4 +1431,52 @@ if __name__ == "__main__":
 ```
 ![](/assets/img/blog/20251128/misc48.png)   
 **flag：** <kbd>ctfshow{0cb07add909d0d60a92101a8b5c7223a}</kbd>
+#### 4.49 Misc49.jpg
+**锐评：** 你们排队排前排的是不是都长得一样好看然后往后过了几个画风就不对了   
+**logic:** 使用010editor打开文件搜打撤无果，发现有很多奇怪的块都以FFE什么开头，E后面的就是藏起来的东西，使用脚本一把梭。
+```python
+with open("misc49.jpg", mode = "rb") as f:
+    flag = f.read().hex()
+
+
+flag = flag.split("ffe")
+flags = ""
+print(len(flag))
+for i in flag[1:]:
+    flags += i[0:2]
+
+print("\nctfshow{0"+flags.replace("0","")[:31]+"}")
+```
+![](/assets/img/blog/20251128/misc49.png)   
+**flag：** <kbd>ctfshow{0c618671a153f5da3948fdb2a2238e44}</kbd>
+#### 4.50 Misc50.png
+**锐评：** 狗头！   
+**logic:** 使用stegsolver点按在不同的通道藏了3张狗头flag。  
+![](/assets/img/blog/20251128/misc50.png)   
+**flag：** <kbd>ctfshow{84470883ee1eec2e886436461bf79111}</kbd>
+#### 4.53 Misc53.png
+**锐评：** 图片有蚂蚁！   
+**logic:** 使用stegsolver点按在不同的通道看到可疑的东西藏在不同通道里，使用data extract提出即可。  
+![](/assets/img/blog/20251128/misc53.png)   
+**flag：** <kbd>ctfshow{69830d5a3a3b5006f7b11193e9bc22a2}</kbd>
+#### 4.54 Misc54.png
+**锐评：** 图片有蚂蚁！   
+**logic:** 使用stegsolver点按在不同的通道看到可疑的东西藏在不同通道里，然后注意可疑的东西是竖着的需要使用column的，然后bitplaneorder随便点的就出来了，使用data extract提出即可。  
+![](/assets/img/blog/20251128/misc54.png)   
+**flag：** <kbd>ctfshow{69830d5a3a3b5006f7b11193e9bc22a2}</kbd>
+#### 4.54 Misc54.png
+**锐评：** 图片有蚂蚁！   
+**logic:** 使用stegsolver点按在不同的通道看到可疑的东西藏在不同通道里，然后注意可疑的东西是竖着的需要使用column的，然后bitplaneorder随便点的就出来了，使用data extract提出即可。  
+![](/assets/img/blog/20251128/misc54.png)   
+**flag：** <kbd>ctfshow{69830d5a3a3b5006f7b11193e9bc22a2}</kbd>
+#### 4.55 Misc55.png
+**锐评：** 图片有蚂蚁！   
+**logic:** 图片怎么颠倒了呢先扶正！再使用stegsolver点按在不同的通道看到可疑的东西藏在不同通道里，然后注意可疑的东西是竖着的需要使用column的，使用data extract提出，但是发现点遍了都没有，使用zsteg -a 1.png，发现藏了个压缩包，save bin为压缩，解压后得到旗子。  
+![](/assets/img/blog/20251128/misc55.png)   
+**flag：** <kbd>ctfshow{daf256838e19a19d9e7b0a69642ad5ee}</kbd>
+#### 4.56 Misc56.png
+**锐评：** 图片有蚂蚁！   
+**logic:** 使用stegsolver点按在不同的通道看到可疑的东西藏在不同通道里，然后注意可疑的东西是竖着的需要使用column的，使用data extract提出即可。  
+![](/assets/img/blog/20251128/misc56.png)   
+**flag：** <kbd>ctfshow{1b30c28a5fca6cec5886b1d2cc8b1263}</kbd>
 #### 未完待续...今天太晚了 有空再更新噢 宝子们 晚安
